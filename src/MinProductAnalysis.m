@@ -143,9 +143,11 @@ set(gca,'Ydir','reverse')
         % Plot our target_dB point
         plot3(X(row,col), Y(row,col), Z(row, col), 'r*');
         
+        % Custom data cursor for readability
         dcm_obj = datacursormode(fig);
         set(dcm_obj, 'UpdateFcn', {@myupdatefcn,Coprimes.Pairs});
         
+        % Save the power from the two period power for each coprime pair
         Coprimes.Two_Period_Power{spacing} = Z(:,2);
          
     end
