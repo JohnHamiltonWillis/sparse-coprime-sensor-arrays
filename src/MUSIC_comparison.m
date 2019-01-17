@@ -15,6 +15,7 @@
 %~1000. Set iteration to 1 to just a single iteration
 %(THERE IS NO PLOTTING FOR ITERATION > 1).
 function [T,figure1] = MUSIC_comparison(A,N,M,num,iterations)
+improvement = 0;
 bothsuccessfulnum = 0;
 singlesuccessfulnum = 0;
 neithersuccessfulnum = 0;
@@ -179,28 +180,9 @@ for sr = 1:iterations             %%remove this for loop and uncomment plot sect
             end
         end
     end
-    %%%%%%%%%%%%%%%%% Success probability comparison %%%%%%%%%%%%%%%%%%%%%
-    % counts how often each autocorrelation estimation is successful
-    % success is measured simply by the number of peaks - if the number
-    %   peaks (locs1 and locs2) matches the number of signals (num) then
-    %   signal detection is successful
-    % Note: Although this is not a sufficient condition for signal
-    %   detection, it is the first condition for signal detection and
-    %   and should be a nice approximation for now. This should be made
-    %   more precise later.
-    if size(locs1,2) == num && size(locs2,2) == num
-        bothsuccessfulnum = bothsuccessfulnum + 1;
-        
-    elseif size(locs2,2) == num
-        averagesuccessfulnum = averagesuccessfulnum + 1;
-    elseif size(locs1,2) == num
-        singlesuccessfulnum = singlesuccessfulnum + 1;
-    else
-        neithersuccessfulnum = neithersuccessfulnum + 1;
-    end
-    comparison = [bothsuccessfulnum averagesuccessfulnum singlesuccessfulnum neithersuccessfulnum];
-    cr = 100*comparison/sr;  %successrate in percent
-    
+ 
+%Compares the two autocorrelation estimations by comparing each of their
+% correlations to the signal impinging on the array
 %John Comparison
     % Calculate the PSD of the sum of signals
     window = chebwin(length(sumx(:,1)), 40);
@@ -210,15 +192,20 @@ for sr = 1:iterations             %%remove this for loop and uncomment plot sect
 
     % Calculate the correlation coefficient between the two
     mF1CC = corrcoef(PSDx,mF1);
-    mF1CC(1, 2)
-    abs(mF1CC(1, 2))
+    mF1CC(1, 2);
     mF2CC = corrcoef(PSDx,mF2);
-    mF2CC(1, 2)
-    abs(mF2CC(1, 2))
+    mF2CC(1, 2);
+    % Compare the correlation coefficients and count how often mF2CC
+    % performs better than mF1CC (does not work - T is always 0)
+    if mF2CC > mF1CC
+        improvement = improvement+1;
+    end
+    ir = improvement*100/sr;
+    
 end
 if iterations > 1
     %%Table display success probabilities in percentage
-    T = array2table(cr,'VariableNames',{'both', 'average', 'single', 'neither'})
+    T = ir
 else
     T = [];
 end
