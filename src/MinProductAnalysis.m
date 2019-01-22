@@ -4,9 +4,7 @@
 % Pablo Johnson, Daniel Sartori, Tyler Trosclair, John Willis
 % Sponsored by Dr. Kaushallya Adhikari
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Set flag to one if you want to plot the peak side lobe peak 
-% and pause the execution. You shouldn't really need to set this to one
-% unless something is changed with the PSL part. 
+ 
 tic
 %% Set variables
 calc_min = 1; % if 1, plot the results from minimum processing

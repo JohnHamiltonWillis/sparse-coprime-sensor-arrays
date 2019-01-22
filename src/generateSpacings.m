@@ -1,7 +1,7 @@
 function Subarray = generateSpacings(M,N,periods)
-% Function to generate vectors of the final sensor placements, as well as
-% the placement for the subarrays. starts at sensor one since sensor zero
-% is always there.
+% Function to generate vector representation of the coprime array given M,
+% N, and the number of periods. Also returns the subarrays and the
+% available lags and number of each lag. 
 %%
 % M = 3;
 % N = 4;
