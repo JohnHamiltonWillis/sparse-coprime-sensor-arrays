@@ -145,8 +145,22 @@ set(gca,'Ydir','reverse')
         dcm_obj = datacursormode(fig);
         set(dcm_obj, 'UpdateFcn', {@myupdatefcn,Coprimes.Pairs});
         
+        pair_names = cell(1,length(Coprimes.Pairs));
+        for i = 1:length(Coprimes.Pairs)
+            pair_names{i} = ['(',num2str(Coprimes.Pairs{i}(1)), ',',...
+                num2str(Coprimes.Pairs{i}(2)),')'];
+        end
+        
+        col_names = cell(1,length(Z(1,:)));
+        for i = 1:length(Z(1,:))
+            col_names{i} = ['P',num2str(i)];
+        end
+        
+        z_table = array2table(Z,'RowNames', pair_names, 'VariableNames', col_names);
+        
         % Save the power from the two period power for each coprime pair
         Coprimes.Two_Period_Power{spacing} = Z(:,2);
+        Coprimes.PSL_table{spacing} = z_table;
          
     end
     
