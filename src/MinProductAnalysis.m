@@ -7,8 +7,10 @@
  
 tic
 %% Set variables
-calc_min = 1; % if 1, plot the results from minimum processing
+calc_min = 1; % if 1, calculate the results from minimum processing
+plot_min = 0; % if 1, plot the results from minimum processing
 calc_product = 0; % if 1, plot the results from product processing
+plot_prod = 0; % if 1, calculate the results from product processing
 close_graphs = 0; % close the graphs after they are generated. 
 
 for spacing = 1:1
@@ -109,8 +111,6 @@ set(gca,'Ydir','reverse')
 %}
     %% Plot Min Processing mesh
     if calc_min == 1
-        fig = figure;
-        hold on;
         % Initialize our three matrices for our data points from the various
         % coprime pairs. 
         X = [];
@@ -127,27 +127,32 @@ set(gca,'Ydir','reverse')
         target_dB = 13;
         Min_target = min(min(abs(Z+target_dB)));
         [row, col] = find(abs(Z + target_dB) == Min_target);
-
-        % Plot the mesh
-        mesh(X,Y,Z);
-        title(['Min Processing PSLs with coprime difference = ', num2str(spacing)]);
-        xlabel('Coprime Pair');
-        ylabel('Additional Periods');
-        zlabel('PSL Power (dB)');
-        view(3); % Set the view to isometric
-        set(gca,'Ydir','reverse'); % I reversed the y axis for readability 
-            %(this essentially just rotates the graph in a certain way)
-            
-        % Plot our target_dB point
-        plot3(X(row,col), Y(row,col), Z(row, col), 'r*');
         
-        % Custom data cursor for readability
-        dcm_obj = datacursormode(fig);
-        set(dcm_obj, 'UpdateFcn', {@myupdatefcn,Coprimes.Pairs});
+        if plot_min == 1
+            % Plot the mesh
+            fig = figure;
+            hold on;
+            mesh(X,Y,Z);
+            title(['Min Processing PSLs with coprime difference = ', num2str(spacing)]);
+            xlabel('Coprime Pair');
+            ylabel('Additional Periods');
+            zlabel('PSL Power (dB)');
+            view(3); % Set the view to isometric
+            set(gca,'Ydir','reverse'); % I reversed the y axis for readability 
+                %(this essentially just rotates the graph in a certain way)
+
+            % Plot our target_dB point
+            plot3(X(row,col), Y(row,col), Z(row, col), 'r*');
+
+            % Custom data cursor for readability
+            dcm_obj = datacursormode(fig);
+            set(dcm_obj, 'UpdateFcn', {@myupdatefcn,Coprimes.Pairs});
+            
+        end
         
         pair_names = cell(1,length(Coprimes.Pairs));
         for i = 1:length(Coprimes.Pairs)
-            pair_names{i} = ['(',num2str(Coprimes.Pairs{i}(1)), ',',...
+            pair_names{i} = ['(',num2str(Coprimes.Pairs{i}(1)), ',',... 
                 num2str(Coprimes.Pairs{i}(2)),')'];
         end
         
@@ -160,7 +165,7 @@ set(gca,'Ydir','reverse')
         
         % Save the power from the two period power for each coprime pair
         Coprimes.Two_Period_Power{spacing} = Z(:,2);
-        Coprimes.PSL_table{spacing} = z_table;
+        Coprimes.Min_PSL_table{spacing} = z_table;
          
     end
     
@@ -169,8 +174,7 @@ set(gca,'Ydir','reverse')
     if calc_product == 1
         % I leave out the comments for this section since it's just a 
         % repeat of the product processing mesh section.
-        figure;
-        hold on;
+
         X = [];
         Y = [];
         Z = [];
@@ -183,19 +187,40 @@ set(gca,'Ydir','reverse')
         target_dB = 13;
         Prod_target = min(min(abs(Z+target_dB)));
         [row, col] = find(abs(Z + target_dB) == Prod_target);
-        mesh(X,Y,Z);
-        title(['Product Processing PSLs with coprime difference = ', num2str(spacing)]);
-        xlabel('Coprime Pair');
-        ylabel('Additional Periods');
-        zlabel('PSL Power (dB)');
-        view(3);
-        set(gca,'Ydir','reverse')
-        hold on;
-        plot3(X(row,col), Y(row,col), Z(row, col), 'r*');
         
-        dcm_obj = datacursormode(fig);
-        set(dcm_obj, 'UpdateFcn', {@myupdatefcn,Coprimes.Pairs});
+        if plot_prod == 1
+            figure;
+            hold on;    
+            mesh(X,Y,Z);
+            title(['Product Processing PSLs with coprime difference = ', num2str(spacing)]);
+            xlabel('Coprime Pair');
+            ylabel('Additional Periods');
+            zlabel('PSL Power (dB)');
+            view(3);
+            set(gca,'Ydir','reverse')
+            hold on;
+            plot3(X(row,col), Y(row,col), Z(row, col), 'r*');
+
+            dcm_obj = datacursormode(fig);
+            set(dcm_obj, 'UpdateFcn', {@myupdatefcn,Coprimes.Pairs});
+        end
+                pair_names = cell(1,length(Coprimes.Pairs));
+        for i = 1:length(Coprimes.Pairs)
+            pair_names{i} = ['(',num2str(Coprimes.Pairs{i}(1)), ',',... 
+                num2str(Coprimes.Pairs{i}(2)),')'];
+        end
+        
+        col_names = cell(1,length(Z(1,:)));
+        for i = 1:length(Z(1,:))
+            col_names{i} = ['P',num2str(i)];
+        end
+        
+        z_table = array2table(Z,'RowNames', pair_names, 'VariableNames', col_names);
+        
+        Coprimes.Prod_PSL_table{spacing} = z_table;
     end
+    
+%% Difference Calculations
     if calc_min == 1 && calc_product == 1
         Prod_Z_mesh = Z;
         diff_min_prod = [diff_min_prod , min(min(Prod_Z_mesh - Min_Z_mesh))];
