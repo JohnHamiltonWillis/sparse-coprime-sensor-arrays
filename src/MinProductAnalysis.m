@@ -8,7 +8,7 @@
 tic
 %% Set variables
 calc_min = 1; % if 1, calculate the results from minimum processing
-plot_min = 0; % if 1, plot the results from minimum processing
+plot_min = 1; % if 1, plot the results from minimum processing
 calc_product = 0; % if 1, plot the results from product processing
 plot_prod = 0; % if 1, calculate the results from product processing
 close_graphs = 0; % close the graphs after they are generated. 
@@ -146,7 +146,7 @@ set(gca,'Ydir','reverse')
 
             % Custom data cursor for readability
             dcm_obj = datacursormode(fig);
-            set(dcm_obj, 'UpdateFcn', {@myupdatefcn,Coprimes.Pairs});
+            set(dcm_obj, 'UpdateFcn', {@MinProductAnalysis_updatefcn,Coprimes.Pairs});
             
         end
         
@@ -202,7 +202,7 @@ set(gca,'Ydir','reverse')
             plot3(X(row,col), Y(row,col), Z(row, col), 'r*');
 
             dcm_obj = datacursormode(fig);
-            set(dcm_obj, 'UpdateFcn', {@myupdatefcn,Coprimes.Pairs});
+            set(dcm_obj, 'UpdateFcn', {@MinProductAnalysis_updatefcn,Coprimes.Pairs});
         end
                 pair_names = cell(1,length(Coprimes.Pairs));
         for i = 1:length(Coprimes.Pairs)

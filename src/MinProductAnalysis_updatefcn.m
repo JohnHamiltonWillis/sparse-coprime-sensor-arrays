@@ -1,4 +1,4 @@
-function txt = myupdatefcn(~,event_obj,t)
+function txt = MinProductAnalysis_updatefcn(~,event_obj,t)
 % Customizes text of data tips
 
 pos = get(event_obj, 'Position');

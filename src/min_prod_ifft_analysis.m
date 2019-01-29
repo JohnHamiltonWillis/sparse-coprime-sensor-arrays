@@ -1,6 +1,6 @@
-close all;
-clear;
-clc;
+% close all;
+% clear;
+% clc;
 
 % Generate Data
 angle = -34;
@@ -10,10 +10,10 @@ deltat = 1/44100;%%%%Temporal sampling interval in s
 SNRdB = -10;%%%%SNR in dB
 vars = 1;%%%%Signal variance
 varn = vars*10^(-SNRdB/10);%%%%Noise variance
- 
-N = 2;
-M = 3;
-max_sensor = 64;
+
+N = 4;
+M = 5;
+max_sensor = 80;
 Array = CoprimeArray(N,M,max_sensor);
 
 max_sensor = Array.max;
@@ -41,7 +41,7 @@ calc_min = 1; % Set to one to calculate minimum processing output
 calc_prod = 1; % ""                     product ""
 
 % Min Processing
-if calc_min == 1
+if calc_min
     %%%%Find the minimum of the absolute values
     min_F = min(abs(fft(data1,max_sensor*10,2)) , abs(fft(data2,max_sensor*10,2)));
     %%%%Find the average
@@ -51,7 +51,7 @@ if calc_min == 1
 end
 
 % Prod Processing
-if calc_prod == 1
+if calc_prod
     %%%%Find the product
     prod_F = fft(data1,max_sensor*10,2) .* conj(fft(data2,max_sensor*10,2));
     %%%%Find the average
@@ -62,9 +62,9 @@ end
 
 %% Plotting
 
-plot_min = 1; % plot minimum processing output
-plot_prod = 1; % ""  product ""
-overlay = 1; % if 1 overlay with preference (calc_min and calc_prod == 1)
+plot_min = 0; % plot minimum processing output
+plot_prod = 0; % ""  product ""
+overlay = 0; % if 1 overlay with preference (calc_min and calc_prod == 1)
 if overlay && calc_min && calc_prod
     % Plot min
     w = linspace(-1,1,length(min_mF));
@@ -185,3 +185,4 @@ if ~overlay && calc_prod && plot_prod
     % Set the remaining axes properties
     set(axes_2_prod,'FontSize',16,'FontWeight','bold');
 end
+
