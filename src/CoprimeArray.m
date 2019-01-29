@@ -3,9 +3,9 @@ function Subarray = CoprimeArray(N,M,max_sensor)
 % N, and the number of periods. Also returns the subarrays and the
 % available lags and number of each lag. 
 %%
-M = 2;
-N = 3;
-max_sensor = 64;
+% M = 2;
+% N = 3;
+% max_sensor = 64;
 
 
 
