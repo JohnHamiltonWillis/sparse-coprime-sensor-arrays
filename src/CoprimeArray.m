@@ -1,4 +1,4 @@
-function Subarray = CoprimeArray(M,N,max_sensor)
+function Subarray = CoprimeArray(N,M,max_sensor)
 % Function to generate vector representation of the coprime array given M,
 % N, and the number of periods. Also returns the subarrays and the
 % available lags and number of each lag. 
