@@ -24,7 +24,6 @@ Sensor_placement = max(vertcat(Subarray1, Subarray2)); % Combine two subarrays
 
 % Save the generated data to the Subarray struct
 Subarray.array = Sensor_placement;
-Subarray.max = max_sensor;
 Subarray.sub1 = Subarray1;
 Subarray.sub2 = Subarray2;
 

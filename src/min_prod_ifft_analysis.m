@@ -16,7 +16,7 @@ M = 5;
 max_sensor = 80;
 Array = CoprimeArray(N,M,max_sensor);
 
-max_sensor = Array.max;
+max_sensor = Array.max_sensor;
 
 sparseindices1 = find(Array.sub1);
 sparseindices2 = find(Array.sub2);
@@ -49,7 +49,7 @@ if calc_min
     %%%%Normalize, fftshift, flip left to right and convert to dB
     min_mF = 20*log10(fliplr(fftshift(min_mF)/max(abs(min_mF))));
 end
-
+ 
 % Prod Processing
 if calc_prod
     %%%%Find the product
@@ -60,11 +60,12 @@ if calc_prod
     prod_mF = 10*log10(fliplr(fftshift(prod_mF)/max(abs(prod_mF))));
 end
 
+
 %% Plotting
 
-plot_min = 0; % plot minimum processing output
-plot_prod = 0; % ""  product ""
-overlay = 0; % if 1 overlay with preference (calc_min and calc_prod == 1)
+plot_min = 1; % plot minimum processing output
+plot_prod = 1; % ""  product ""
+overlay = 1; % if 1 overlay with preference (calc_min and calc_prod == 1)
 if overlay && calc_min && calc_prod
     % Plot min
     w = linspace(-1,1,length(min_mF));
