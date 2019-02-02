@@ -8,18 +8,24 @@
 tic
 %% Set variables
 calc_min = 1; % if 1, calculate the results from minimum processing
-plot_min = 1; % if 1, plot the results from minimum processing
-calc_product = 0; % if 1, plot the results from product processing
+plot_min = 0; % if 1, plot the results from minimum processing
+calc_product = 1; % if 1, plot the results from product processing
 plot_prod = 0; % if 1, calculate the results from product processing
 close_graphs = 0; % close the graphs after they are generated. 
 
-for spacing = 1:1
+spacing_min = 1;
+spacing_max = 30;
+
+for spacing = spacing_min:spacing_max
 flag = 0;
 diff_min_prod = [];
 
 % Here are the coprime pairs we will test
 % Coprimes.Pairs = {[2,3], [3,4], [4,5], [5,6], [6, 7], [8, 9], [9, 10]};
-Coprimes.Pairs = GenerateCoprimePairs(3,7,spacing);
+min_int = 2;
+max_int = 100;
+
+Coprimes.Pairs = GenerateCoprimePairs(min_int,max_int,spacing);
 
 % Here is our preallocation for the Min and Prod data
 Coprimes.MinData = cell(1,length(Coprimes.Pairs));
@@ -122,6 +128,7 @@ set(gca,'Ydir','reverse')
             Y = [Y;multipliers];
             Z = [Z;Coprimes.MinData{i}];
         end
+        Y = Y+1;
         % This is the target dB. The following lines of code find the point in the
         % data closest to the target dB and plot a red star to denote it. 
         target_dB = 13;
@@ -135,7 +142,7 @@ set(gca,'Ydir','reverse')
             mesh(X,Y,Z);
             title(['Min Processing PSLs with coprime difference = ', num2str(spacing)]);
             xlabel('Coprime Pair');
-            ylabel('Additional Periods');
+            ylabel('Periods');
             zlabel('PSL Power (dB)');
             view(3); % Set the view to isometric
             set(gca,'Ydir','reverse'); % I reversed the y axis for readability 
@@ -162,7 +169,8 @@ set(gca,'Ydir','reverse')
         end
         
         z_table = array2table(Z,'RowNames', pair_names, 'VariableNames', col_names);
-        
+        filename = ['C:\Users\ELEN 479\Documents\Generated_Tables\Minimum\', num2str(min_int), '_', num2str(max_int)', '_', num2str(spacing)];
+        save(filename, 'z_table','X','Y','Z');
         % Save the power from the two period power for each coprime pair
         Coprimes.Two_Period_Power{spacing} = Z(:,2);
         Coprimes.Min_PSL_table{spacing} = z_table;
@@ -184,6 +192,7 @@ set(gca,'Ydir','reverse')
             Y = [Y;multipliers];
             Z = [Z;Coprimes.ProdData{i}];
         end
+        Y = Y+1;
         target_dB = 13;
         Prod_target = min(min(abs(Z+target_dB)));
         [row, col] = find(abs(Z + target_dB) == Prod_target);
@@ -194,7 +203,7 @@ set(gca,'Ydir','reverse')
             mesh(X,Y,Z);
             title(['Product Processing PSLs with coprime difference = ', num2str(spacing)]);
             xlabel('Coprime Pair');
-            ylabel('Additional Periods');
+            ylabel('Periods');
             zlabel('PSL Power (dB)');
             view(3);
             set(gca,'Ydir','reverse')
@@ -216,7 +225,8 @@ set(gca,'Ydir','reverse')
         end
         
         z_table = array2table(Z,'RowNames', pair_names, 'VariableNames', col_names);
-        
+        filename = ['C:\Users\ELEN 479\Documents\Generated_Tables\Product\', num2str(min_int), '_', num2str(max_int)', '_', num2str(spacing)];
+        save(filename, 'z_table','X','Y','Z');
         Coprimes.Prod_PSL_table{spacing} = z_table;
     end
     
@@ -229,5 +239,10 @@ set(gca,'Ydir','reverse')
     if close_graphs == 1
         close all
     end
+end
+
+if calc_min == 1 && calc_product == 1
+    filename = ['C:\Users\ELEN 479\Documents\Generated_Tables\Difference\', num2str(min_int), '_', num2str(max_int)', '_', num2str(spacing)];
+    save(filename, 'diff_min_prod');
 end
 toc;
