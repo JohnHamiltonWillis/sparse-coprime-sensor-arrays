@@ -225,7 +225,7 @@ set(gca,'Ydir','reverse')
         end
         
         z_table = array2table(Z,'RowNames', pair_names, 'VariableNames', col_names);
-        filename = ['C:\Users\ELEN 479\Documents\Generated_Tables\Product\', num2str(min_int), '_', num2str(max_int)', '_', num2str(spacing)];
+        filename = ['C:\Users\ELEN 479\Documents\Generated_Tables\Product\', num2str(min_int), '_', num2str(max_int), '_', num2str(spacing)];
         save(filename, 'z_table','X','Y','Z');
         Coprimes.Prod_PSL_table{spacing} = z_table;
     end
@@ -242,7 +242,7 @@ set(gca,'Ydir','reverse')
 end
 
 if calc_min == 1 && calc_product == 1
-    filename = ['C:\Users\ELEN 479\Documents\Generated_Tables\Difference\', num2str(min_int), '_', num2str(max_int)', '_', num2str(spacing)];
+    filename = ['C:\Users\ELEN 479\Documents\Generated_Tables\Difference\', num2str(min_int), '_', num2str(max_int), '_', num2str(spacing)];
     save(filename, 'diff_min_prod');
 end
 toc;
