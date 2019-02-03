@@ -169,7 +169,7 @@ set(gca,'Ydir','reverse')
         end
         
         z_table = array2table(Z,'RowNames', pair_names, 'VariableNames', col_names);
-        filename = ['C:\Users\ELEN 479\Documents\Generated_Tables\Minimum\', num2str(min_int), '_', num2str(max_int)', '_', num2str(spacing)];
+        filename = ['C:\Users\ELEN 479\Documents\Generated_Tables\Minimum\', num2str(min_int), '_', num2str(max_int), '_', num2str(spacing)];
         save(filename, 'z_table','X','Y','Z');
         % Save the power from the two period power for each coprime pair
         Coprimes.Two_Period_Power{spacing} = Z(:,2);
