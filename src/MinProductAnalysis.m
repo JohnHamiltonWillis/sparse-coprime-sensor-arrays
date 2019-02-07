@@ -4,26 +4,38 @@
 % Pablo Johnson, Daniel Sartori, Tyler Trosclair, John Willis
 % Sponsored by Dr. Kaushallya Adhikari
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- 
+datetime
+% file_loc = 'C:\Users\ELEN 479\Documents\Generated_Tables\00001_res\';
+% mkdir(file_loc);
+% mkdir([file_loc,'Product']); 
+% mkdir([file_loc,'Minimum']);
+% mkdir([file_loc,'Difference']);
+% mkdir([file_loc,'Figures']);
+% mkdir([file_loc,'Figures\Minimum']);
+% mkdir([file_loc,'Figures\Product']);
 tic
 %% Set variables
 calc_min = 1; % if 1, calculate the results from minimum processing
-plot_min = 0; % if 1, plot the results from minimum processing
+plot_min = 1; % if 1, plot the results from minimum processing
 calc_product = 1; % if 1, plot the results from product processing
-plot_prod = 0; % if 1, calculate the results from product processing
-close_graphs = 0; % close the graphs after they are generated. 
+plot_prod = 1; % if 1, calculate the results from product processing
+close_graphs = 1; % close the graphs after they are generated. 
+save_min = 0;
+save_min_fig = 0;
+save_prod = 0;
+save_prod_fig = 0;
 
 spacing_min = 1;
-spacing_max = 30;
+spacing_max = 1;
 
 for spacing = spacing_min:spacing_max
-flag = 0;
+flag = 1; % Used to verify PSL finding is accurate
 diff_min_prod = [];
 
 % Here are the coprime pairs we will test
 % Coprimes.Pairs = {[2,3], [3,4], [4,5], [5,6], [6, 7], [8, 9], [9, 10]};
-min_int = 2;
-max_int = 100;
+min_int = 4;
+max_int = 5;
 
 Coprimes.Pairs = GenerateCoprimePairs(min_int,max_int,spacing);
 
@@ -84,6 +96,8 @@ for i = 1:length(Coprimes.Pairs)
             hold on;
             plot(u(Bmin_max_loc), Bmin_max, 'r*');
             plot(u(Bprod_max_loc), Bprod_max,'b*');
+            Bmin_max
+            Bprod_max
             pause;
             close gcf;
         else
@@ -154,7 +168,10 @@ set(gca,'Ydir','reverse')
             % Custom data cursor for readability
             dcm_obj = datacursormode(fig);
             set(dcm_obj, 'UpdateFcn', {@MinProductAnalysis_updatefcn,Coprimes.Pairs});
-            
+            if save_min_fig
+                filename = [file_loc,'Figures\Minimum\', num2str(min_int), '_', num2str(max_int), '_', num2str(spacing)];
+                savefig(gcf,filename, 'compact');
+            end
         end
         
         pair_names = cell(1,length(Coprimes.Pairs));
@@ -169,8 +186,10 @@ set(gca,'Ydir','reverse')
         end
         
         z_table = array2table(Z,'RowNames', pair_names, 'VariableNames', col_names);
-        filename = ['C:\Users\ELEN 479\Documents\Generated_Tables\Minimum\', num2str(min_int), '_', num2str(max_int), '_', num2str(spacing)];
-        save(filename, 'z_table','X','Y','Z');
+        if save_min
+            filename = [file_loc, 'Minimum\', num2str(min_int), '_', num2str(max_int), '_', num2str(spacing)];
+            save(filename, 'z_table','X','Y','Z');
+        end
         % Save the power from the two period power for each coprime pair
         Coprimes.Two_Period_Power{spacing} = Z(:,2);
         Coprimes.Min_PSL_table{spacing} = z_table;
@@ -212,6 +231,10 @@ set(gca,'Ydir','reverse')
 
             dcm_obj = datacursormode(fig);
             set(dcm_obj, 'UpdateFcn', {@MinProductAnalysis_updatefcn,Coprimes.Pairs});
+            if save_prod_fig 
+                filename = [file_loc, 'Figures\Product\', num2str(min_int), '_', num2str(max_int), '_', num2str(spacing)];
+                savefig(gcf,filename, 'compact');
+            end
         end
                 pair_names = cell(1,length(Coprimes.Pairs));
         for i = 1:length(Coprimes.Pairs)
@@ -225,8 +248,10 @@ set(gca,'Ydir','reverse')
         end
         
         z_table = array2table(Z,'RowNames', pair_names, 'VariableNames', col_names);
-        filename = ['C:\Users\ELEN 479\Documents\Generated_Tables\Product\', num2str(min_int), '_', num2str(max_int), '_', num2str(spacing)];
-        save(filename, 'z_table','X','Y','Z');
+        if save_prod
+            filename = [file_loc, 'Product\', num2str(min_int), '_', num2str(max_int), '_', num2str(spacing)];
+            save(filename, 'z_table','X','Y','Z');
+        end
         Coprimes.Prod_PSL_table{spacing} = z_table;
     end
     
@@ -241,8 +266,8 @@ set(gca,'Ydir','reverse')
     end
 end
 
-if calc_min == 1 && calc_product == 1
-    filename = ['C:\Users\ELEN 479\Documents\Generated_Tables\Difference\', num2str(min_int), '_', num2str(max_int), '_', num2str(spacing)];
+if save_min && save_prod
+    filename = [file_loc,'Difference\', num2str(min_int), '_', num2str(max_int), '_', num2str(spacing)];
     save(filename, 'diff_min_prod');
 end
 toc;
