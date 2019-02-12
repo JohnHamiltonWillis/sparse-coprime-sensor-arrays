@@ -19,11 +19,13 @@ calc_min = 1; % if 1, calculate the results from minimum processing
 plot_min = 1; % if 1, plot the results from minimum processing
 calc_product = 1; % if 1, plot the results from product processing
 plot_prod = 1; % if 1, calculate the results from product processing
+
 close_graphs = 1; % close the graphs after they are generated. 
 save_min = 1;
 save_min_fig = 1;
 save_prod = 1;
 save_prod_fig = 1;
+
 
 spacing_min = 1;
 spacing_max = 30;
@@ -34,8 +36,10 @@ diff_min_prod = [];
 
 % Here are the coprime pairs we will test
 % Coprimes.Pairs = {[2,3], [3,4], [4,5], [5,6], [6, 7], [8, 9], [9, 10]};
+
 min_int = 2;
 max_int = 100;
+
 
 Coprimes.Pairs = GenerateCoprimePairs(min_int,max_int,spacing);
 
@@ -217,7 +221,7 @@ set(gca,'Ydir','reverse')
         [row, col] = find(abs(Z + target_dB) == Prod_target);
         
         if plot_prod == 1
-            figure;
+            fig = figure;
             hold on;    
             mesh(X,Y,Z);
             title(['Product Processing PSLs with coprime difference = ', num2str(spacing)]);
