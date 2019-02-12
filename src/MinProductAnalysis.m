@@ -5,14 +5,14 @@
 % Sponsored by Dr. Kaushallya Adhikari
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 datetime
-% file_loc = 'C:\Users\ELEN 479\Documents\Generated_Tables\00001_res\';
-% mkdir(file_loc);
-% mkdir([file_loc,'Product']); 
-% mkdir([file_loc,'Minimum']);
-% mkdir([file_loc,'Difference']);
-% mkdir([file_loc,'Figures']);
-% mkdir([file_loc,'Figures\Minimum']);
-% mkdir([file_loc,'Figures\Product']);
+file_loc = 'C:\Users\ELEN 479\Documents\Generated_Tables\00001_res\';
+mkdir(file_loc);
+mkdir([file_loc,'Product']); 
+mkdir([file_loc,'Minimum']);
+mkdir([file_loc,'Difference']);
+mkdir([file_loc,'Figures']);
+mkdir([file_loc,'Figures\Minimum']);
+mkdir([file_loc,'Figures\Product']);
 tic
 %% Set variables
 calc_min = 1; % if 1, calculate the results from minimum processing
@@ -20,22 +20,22 @@ plot_min = 1; % if 1, plot the results from minimum processing
 calc_product = 1; % if 1, plot the results from product processing
 plot_prod = 1; % if 1, calculate the results from product processing
 close_graphs = 1; % close the graphs after they are generated. 
-save_min = 0;
-save_min_fig = 0;
-save_prod = 0;
-save_prod_fig = 0;
+save_min = 1;
+save_min_fig = 1;
+save_prod = 1;
+save_prod_fig = 1;
 
 spacing_min = 1;
-spacing_max = 1;
+spacing_max = 30;
 
 for spacing = spacing_min:spacing_max
-flag = 1; % Used to verify PSL finding is accurate
+flag = 0; % Used to verify PSL finding is accurate
 diff_min_prod = [];
 
 % Here are the coprime pairs we will test
 % Coprimes.Pairs = {[2,3], [3,4], [4,5], [5,6], [6, 7], [8, 9], [9, 10]};
-min_int = 4;
-max_int = 5;
+min_int = 2;
+max_int = 100;
 
 Coprimes.Pairs = GenerateCoprimePairs(min_int,max_int,spacing);
 
@@ -46,7 +46,7 @@ Coprimes.ProdData = cell(1,length(Coprimes.Pairs));
 
 
 % max number of periods added. 
-max_multiples = 5;
+max_multiples = 10;
 
 multipliers = 0:max_multiples;
 
@@ -65,8 +65,8 @@ for i = 1:length(Coprimes.Pairs)
     for add = multipliers
         % set add1, add2 to however many more periods 
         %   we want to add for this iteration
-        add1 = (U1*add);
-        add2 = (U2*add);
+        add1 = (M*add);
+        add2 = (N*add);
 
         % We need Bmin, Bprod, and u to look in the correct range for the peak
         % side lobe
