@@ -1,0 +1,1 @@
+This folder includes the results from our analysis of averaging lags for application to MUSIC. Currently, data is being generated, so this folder been created as a placeholder.
