@@ -1,0 +1,1 @@
+This folder includes the results from our analysis of minimum processing versus product processing. Currently, data is being generated for all sorts of case, so these are incomplete results. The data may be viewed using MATLAB to open up the figures and raw data.
