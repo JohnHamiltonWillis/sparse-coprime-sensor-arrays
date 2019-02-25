@@ -16,6 +16,24 @@ for spacing = 1:63
             % Shift the array across the full length of the array
             for shift = 0:(63-length(coprime_array))
                 coprime_array = [0 coprime_array(1:(length(coprime_array)-1))];
+                % Check if the proper sensors are available for coprime
+                % array
+                eligible = true;
+                for sensor = 1:length(coprime_array)             
+                    if ((coprime_array(sensor)==1) && (sensor_layout(sensor)==0))
+                        eligible = false;
+                        break
+                    end
+                end
+                % Store best coprime layout
+                if eligible == true
+                    %pull PSL data
+                    temp = [2 3 13.25]; %temp = (pull data from table)
+                    % Store the highest PSL difference
+                    if temp(3) > coprime_spec(3)
+                        coprime_spec = temp;
+                    end
+                end
             end
         end
     end
