@@ -1,8 +1,8 @@
 function [opt_coprime_array] = CoprimeLayoutOptimizer(sensor_layout)
-% Function to use the best possible coprime pairs to reduce PSL height. 
-% This function currently only generates coprime arrays starting at the
-% first sensor in the array and only generates subarrays that have sensors
-% available for full extension to the last sensor
+% Function to use to determine the best possible coprime pairs to reduce
+% PSL height. This function currently isn't hooked up to the data required 
+% for comparisons. Once data is in a more readable format, this algorithm
+% will be updated.
 coprime_spec = [0 0 0];
 for spacing = 1:63
     % Iterate through all the coprime pair spacings and generate pairs
