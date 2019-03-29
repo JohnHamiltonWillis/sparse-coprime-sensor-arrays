@@ -1,0 +1,1 @@
+This folder includes the results from our analysis of minimum processing and product processing combined with inverse fast fourier transform as a way to generate the autocorrelation matrix for the MUSIC algorithm. Currently, the folder serves as a place holder for our results when our analyses finish.
