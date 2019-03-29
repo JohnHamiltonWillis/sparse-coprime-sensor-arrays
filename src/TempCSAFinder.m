@@ -1,4 +1,4 @@
-function [coprime_arrays] = TempCSAFinder(sensor_layout,array_length)
+function [coprime_arrays] = TempCSAFinder(sensor_layout)
 % sensor_layout is a vector of 1's and 0's where a 1 indicates that a 
 % sensor is available at that position. array_length is the total number of
 % sensor positions in the array. This function finds all the possible 
@@ -6,6 +6,7 @@ function [coprime_arrays] = TempCSAFinder(sensor_layout,array_length)
 % will fit in any given sparse linear array. This function will likely be 
 % repurposed later for higher functionality.
 coprime_arrays = [];
+array_length = length(sensor_layout);
 for spacing = 1:(array_length-1)
     % Iterate through all the coprime pair spacings and generate pairs
     cpairs = GenerateCoprimePairs(2,array_length, spacing);
