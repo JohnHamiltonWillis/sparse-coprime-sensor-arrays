@@ -1,24 +1,22 @@
-function Subarray = CoprimeArray(N,M,max_sensor)
-% Function to generate vector representation of the coprime array given M,
-% N, and the number of periods. Also returns the subarrays and the
+function Subarray = CoprimeArray(M,N,U1,U2)
+% Function to generate vector representation of the coprime array given Me,
+% Ne, and the undersamping factors. Also returns the subarrays and the
 % available lags and number of each lag. 
 %%
 % M = 2;
 % N = 3;
 % max_sensor = 64;
 
-
-
-Subarray.max_sensor = max_sensor;
-
+ max_sensor = max((M-1)*U1, (N-1)*U2)+1;
+ 
+ 
 % Generate 0 1 representation of subarray 1 and 2
 Subarray1 = zeros(1,max_sensor);
-Subarray1((0:N:(max_sensor-1))+1) = 1;
+Subarray1((0:U1:(M-1)*U1)+1) = 1;
 % Subarray1 = [1,Subarray1];
 Subarray2 = zeros(1,max_sensor);
-Subarray2((0:M:(max_sensor-1))+1) = 1;
+Subarray2((0:U2:(N-1)*U2)+1) = 1;
 % Subarray2 = [1,Subarray2];
-
 
 Sensor_placement = max(vertcat(Subarray1, Subarray2)); % Combine two subarrays
 
@@ -28,17 +26,7 @@ Subarray.sub1 = Subarray1;
 Subarray.sub2 = Subarray2;
 
 % Find the available lags given our coprime array
-lags = zeros(1,max_sensor); 
-for i = 1:length(Sensor_placement) 
-    if Sensor_placement(i) == 1 
-        for k = i:length(Sensor_placement) 
-            if Sensor_placement(k) == 1
-                lags(k-i+1) = lags(k-i+1)+1; % add 1 to the number of lags at k-i lag
-            end
-        end
-    end
-end
-lags = [0:max_sensor-1; lags];
-Subarray.lags = lags;
+coarray = conv(Sensor_placement,fliplr(Sensor_placement));
+Subarray.coarray = coarray;
 
 end
