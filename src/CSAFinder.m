@@ -1,4 +1,4 @@
-function [coprime_arrays] = TempCSAFinder(sensor_layout)
+function [coprime_arrays] = CSAFinder(sensor_layout)
 % sensor_layout is a vector of 1's and 0's where a 1 indicates that a 
 % sensor is available at that position. array_length is the total number of
 % sensor positions in the array. This function finds all the possible 
