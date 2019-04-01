@@ -3,11 +3,12 @@ function [coprime_arrays] = CSAFinder(sensor_layout)
 % sensor is available at that position. array_length is the total number of
 % sensor positions in the array. This function finds all the possible 
 % coprime sensor array layouts that will fit in any given sparse linear 
-% array.
+% array. This returns coprime_arrays which gives M, N, U1, and U2 in each 
+% row of the array.
 coprime_arrays = [];
 array_length = length(sensor_layout);
 for spacing = 1:(array_length-1)
-    % Iterate through all the coprime pair spacings and generate pairs
+    % Iterate through all the coprime pair spacings3 and generate pairs
     cpairs = GenerateCoprimePairs(2,array_length, spacing);
     for pair = 1:length(cpairs)
         % Iterate through all the coprime pairs
@@ -37,7 +38,7 @@ for spacing = 1:(array_length-1)
                 end
                 % Store eligible coprime layout
                 if eligible == true
-                    coprime_arrays = [coprime_arrays; cpairs{pair}(1) cpairs{pair}(2) max_sensor1 max_sensor2];
+                    coprime_arrays = [coprime_arrays; max_sensor1 max_sensor2 cpairs{pair}(1) cpairs{pair}(2)];
                 end
             end
         end
