@@ -11,14 +11,12 @@ for spacing = 1:(array_length-1)
     cpairs = GenerateCoprimePairs(2,array_length, spacing);
     for pair = 1:length(cpairs)
         % Iterate through all the coprime pairs
-        for period1 = 1:floor(array_length/cpairs{pair}(1))
+        for max_sensor1 = 1:floor((array_length-1)/cpairs{pair}(1)+1)
             % Iterate through all the period extensions that fit in the
             % full sensor array for subarray1
-            max_sensor1 = period1*cpairs{pair}(1);
-            for period2 = 1:floor(array_length/cpairs{pair}(2))
+            for max_sensor2 = 1:floor((array_length-1)/cpairs{pair}(2)+1)
                 % Iterate through all the period extensions that fit in the
                 % full sensor array for subarray2
-                max_sensor2 = period2*cpairs{pair}(2);
                 % Create the coprime layout necessary for a given coprime
                 % pair and their subarrays extensions
                 coprime_array = CoprimeArray(max_sensor1,max_sensor2,cpairs{pair}(1),cpairs{pair}(2));
