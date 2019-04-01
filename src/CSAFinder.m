@@ -14,14 +14,15 @@ for spacing = 1:(array_length-1)
         for period1 = 1:floor(array_length/cpairs{pair}(1))
             % Iterate through all the period extensions that fit in the
             % full sensor array for subarray1
-            max_sensor1 = period*cpairs{pair}(1);
+            max_sensor1 = period1*cpairs{pair}(1);
             for period2 = 1:floor(array_length/cpairs{pair}(2))
                 % Iterate through all the period extensions that fit in the
                 % full sensor array for subarray2
-                max_sensor2 = period*cpairs{pair}(2);
+                max_sensor2 = period2*cpairs{pair}(2);
                 % Create the coprime layout necessary for a given coprime
                 % pair and their subarrays extensions
                 coprime_array = CoprimeArray(max_sensor1,max_sensor2,cpairs{pair}(1),cpairs{pair}(2));
+                coprime_array = coprime_array.array;
                 for shift = 1:(array_length-length(coprime_array))
                     % Shift coprime array from the beginning to the end of
                     % the full array
