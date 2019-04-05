@@ -118,19 +118,18 @@ z1 = z1(1:U1*U2+1);
 %%%%Create matrix from z1 to apply spatial smoothing.
 z1matrix = toeplitz(z1);
 %%%%% This step below is taking a covariance estimation of z1matrix.
-zss = zeros(U2*U1+1,U2*U1+1);
 %%%%% z1 should be continuous
-z1indicator = ones(U2*U1+1,1); 
+z1indicator = ones(1,U2*U1+1); 
 %%%%% number of lags produced by z1
-coarray2 = conv(z1indicator,fliplr(z1indicator));
-coarray2 = coarray2(1:U1*U2);
+coarray2 = conv(z1indicator.',fliplr(z1indicator.'));
+coarray2(1:U1*U2) = [];
 for kdx = 1:U2*U1+1
     dataset2 = z1matrix(:,kdx);
     tempR2 = conv(dataset2.',fliplr(conj(dataset2.')));
-    tempR2 = tempR2(1:U1*U2);
-    zss(:,kdx) = (tempR2.')./(coarray2);
+    tempR2(1:U1*U2)=[];
+    zss(kdx,:) = (tempR2)./(coarray2.');
 end
-Restimatess = mean(zss,2);
+Restimatess = mean(zss,2)
 Rmatrixss = toeplitz(Restimatess.');
 [eVecd, eVald] = eig(Rmatrixss);
 eVald = diag(eVald);
