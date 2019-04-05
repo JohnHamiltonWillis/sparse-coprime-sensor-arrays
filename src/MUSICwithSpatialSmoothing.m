@@ -7,8 +7,8 @@
 %%%%"directionEstimates in that it doesn't have "plotfigure" argument
 %%%%For each trial, this program keeps passing through a loop until a
 %%%%satisfactory data set is obtained
-N=32;
-M=21;
+N=12;
+M=12;
 U1 = 2;
 U2 = 3;
 %%%U1<U2
@@ -85,7 +85,7 @@ for kdx = 1:SampleSize
     %%%%The convolution operation can actually be used to find
     %%%%autocorrelation as shown below, for each set of samples
     tempR = conv(dataset.',fliplr(conj(dataset.')));
-%   tempR(1:temp) = [];
+    tempR(1:temp) = [];
 %     if ~isempty(firstzeroindex)
 %         tempR(firstzeroindex:end) = [];
 %     end
@@ -120,14 +120,15 @@ z1matrix = toeplitz(z1);
 %%%%% This step below is taking a covariance estimation of z1matrix.
 zss = zeros(U2*U1+1,U2*U1+1);
 %%%%% z1 should be continuous
-z1indicator = ones(U2*U1+1); 
+z1indicator = ones(U2*U1+1,1); 
 %%%%% number of lags produced by z1
 coarray2 = conv(z1indicator,fliplr(z1indicator));
+coarray2 = coarray2(1:U1*U2);
 for kdx = 1:U2*U1+1
     dataset2 = z1matrix(:,kdx);
     tempR2 = conv(dataset2.',fliplr(conj(dataset2.')));
-    tempR2(1:U1*U2) = [];
-    zss(:,kdx) = (tempR2.')./(coarray2.');
+    tempR2 = tempR2(1:U1*U2);
+    zss(:,kdx) = (tempR2.')./(coarray2);
 end
 Restimatess = mean(zss,2);
 Rmatrixss = toeplitz(Restimatess.');
