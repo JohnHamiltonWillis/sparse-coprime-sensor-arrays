@@ -13,8 +13,8 @@ N=12;
 M=12;
 U1 = 2;
 U2 = 3;
-num = 3; %%number of sources
-SNRdB = 5;
+num = 10; %%number of sources
+SNRdB = 10;
 SampleSize = 1000;
 us = cosd(randi(181,[1 num])-1);%%%Directions are uniformly distributed from 0 to 180 degrees
 numSources = length(us);
@@ -81,7 +81,8 @@ end
 Restimate = r/SampleSize;
 %%%%%%% Spatial Smoothing Step:
 %%%%%%%Vectorize Restimate and average repeated lags. We may think of z1 as data
-%%%%%%%received by a new ULA with sensors from 0 to U1*U2.
+%%%%%%%received by a new ULA with sensors from matching the first continous
+%%%%%%%range of lags.
 z1 = zeros(1,length(coarray));
 lags = zeros(1,length(coarray));
 %%%%Search for kth lag and store in z1(k). Searches through all columns in
@@ -101,18 +102,24 @@ for i = 1:length(coarray)
 end
 %%%%Dividing by lags to take the average
 z1 = z1./lags;
-z1 = z1(1:U1*U2+1);
+for i = 1:length(z1)
+    if abs(z1(i))<0
+        break
+    end
+end
+z1 = z1(1:i-2);
 %%%%Create matrix from z1 to apply spatial smoothing.
 z1matrix = toeplitz(z1);
 %%%%% This step below is taking a covariance estimation of z1matrix.
 %%%%% z1 should be continuous
-z1indicator = ones(1,U2*U1+1); 
+z1indicator = ones(1,i-2); 
 %%%%% number of lags produced by z1
 coarray2 = conv(z1indicator.',fliplr(z1indicator.'));
-coarray2(1:U1*U2) = [];
+temp = (length(coarray2)-1)/2;
+coarray2(1:temp) = [];
 %%%%covariance estimates
 r = zeros(length(coarray2),length(coarray2));
-for kdx = 1:U1*U2+1
+for kdx = 1:i-2
     dataset = z1matrix(:,kdx);
     %%%%Estimate covariance for a single sensor
     tempR = dataset.*conj(transpose(dataset));
