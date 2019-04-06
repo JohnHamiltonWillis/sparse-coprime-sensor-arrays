@@ -7,13 +7,14 @@
 %%%%"directionEstimates in that it doesn't have "plotfigure" argument
 %%%%For each trial, this program keeps passing through a loop until a
 %%%%satisfactory data set is obtained
+clear all;
+close all;
 N=12;
 M=12;
 U1 = 2;
 U2 = 3;
-%%%U1<U2
-SNRdB = 10;
-SampleSize = 100;
+SNRdB = 5;
+SampleSize = 1000;
 us = cosd(randi(181,[1 2])-1);%%%Directions are uniformly distributed from 0 to 180 degrees
 numSources = length(us);
 lambda = 50;    d = lambda/2;    kx = 2*pi/lambda * us;
@@ -68,32 +69,15 @@ lags = -max(indexunion):max(indexunion);
 temp = (length(coarray)-1)/2;%%%%This is the number of negative elements that can be removed
 coarray(1:temp) = [];%%%%Removes the negative half of coarray
 lags(1:temp) = [];%%%%Removes the negative half of lags
-%%%%The coarray could have holes. Keep the longest hole-free and
-%%%%the associated lags.
-% firstzeroindex = find(coarray==0,1);%%%finds the index of the first zero elementconv(a,b)
-%%%%if the firstzeroindex is not empty, remove the elements from
-%%%%coarray and lag starting at the first zero element
-% if ~isempty(firstzeroindex)
-%     coarray(firstzeroindex:end) = [];
-%     lags(firstzeroindex:end) = [];
-% end
-%%%%We remove the empty elements later in spatial smoothing instead of
-%%%%in the steps above.
-r = zeros(length(coarray),SampleSize);%%%%covariance estimates
+%%%%covariance estimates
+r = zeros(length(coarray),length(coarray));
 for kdx = 1:SampleSize
     dataset = xtotal(:,kdx);
-    %%%%The convolution operation can actually be used to find
-    %%%%autocorrelation as shown below, for each set of samples
-    tempR = conv(dataset.',fliplr(conj(dataset.')));
-    tempR(1:temp) = [];
-%     if ~isempty(firstzeroindex)
-%         tempR(firstzeroindex:end) = [];
-%     end
-    %%%%The step above is removed for spatial smoothing
-    r(:,kdx) = (tempR.')./(coarray.');
+    %%%%Estimate covariance for a single time sample
+    tempR = dataset.*conj(transpose(dataset));
+    r = r + tempR;
 end
-Restimate = mean(r,2);
-Rmatrix = toeplitz(Restimate.');
+Restimate = r/SampleSize;
 %%%%%%% Spatial Smoothing Step
 %%%%Vectorize Rmatrix and remove repeated lags. We may think of z1 as data
 %%%%received by a new ULA with sensors from -U1*U2 to U1*U2.
@@ -102,8 +86,8 @@ for i = 1:U1*N
     for k = 1:U1*N 
         for j = k:U1*N 
             if z1(k)==0
-                if abs(Rmatrix(i,j)) > 0
-                    z1(k) = Rmatrix(i,j);
+                if abs(Restimate(i,j)) > 0
+                    z1(k) = Restimate(i,j);
                 end
             end
         end
@@ -113,8 +97,6 @@ end
 %%%%in z1 will be continuous. The positive lags are continuous so we will
 %%%%use the set of positive lags to create the negative lags.
 z1 = z1(1:U1*U2+1);
-% z2 = conj(fliplr(z1(2:M*N+1)));
-% z3 = [z2, z1];
 %%%%Create matrix from z1 to apply spatial smoothing.
 z1matrix = toeplitz(z1);
 %%%%% This step below is taking a covariance estimation of z1matrix.
@@ -123,17 +105,14 @@ z1indicator = ones(1,U2*U1+1);
 %%%%% number of lags produced by z1
 coarray2 = conv(z1indicator.',fliplr(z1indicator.'));
 coarray2(1:U1*U2) = [];
-for kdx = 1:U2*U1+1
-    dataset2 = z1matrix(:,kdx);
-    tempR2 = conv(dataset2.',fliplr(conj(dataset2.')));
-    tempR2(1:U1*U2)=[];
-    zss(kdx,:) = (tempR2)./(coarray2.');
+%%%%covariance estimates
+r = zeros(length(coarray2),length(coarray2));
+for kdx = 1:U1*U2+1
+    dataset = z1matrix(:,kdx);
+    %%%%Estimate covariance for a single sensor
+    tempR = dataset.*conj(transpose(dataset));
+    r = r + tempR;
 end
-Restimatess = mean(zss,2)
-Rmatrixss = toeplitz(Restimatess.');
-[eVecd, eVald] = eig(Rmatrixss);
-eVald = diag(eVald);
-[~,sortindexd] = sort(eVald,'descend');
-eVecsortedd = eVecd(:,sortindexd);
-noiseBasisd = eVecsortedd(:,length(us)+1:end);
-Rndirect = noiseBasisd*noiseBasisd';
+Restimatess = r/(U1*U2+1);
+[Plot,mF,w] = MUSICcomp(Restimatess,us);
+
