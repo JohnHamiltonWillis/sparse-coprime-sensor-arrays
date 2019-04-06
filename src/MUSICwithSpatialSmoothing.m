@@ -13,9 +13,10 @@ N=12;
 M=12;
 U1 = 2;
 U2 = 3;
+num = 3; %%number of sources
 SNRdB = 5;
 SampleSize = 1000;
-us = cosd(randi(181,[1 2])-1);%%%Directions are uniformly distributed from 0 to 180 degrees
+us = cosd(randi(181,[1 num])-1);%%%Directions are uniformly distributed from 0 to 180 degrees
 numSources = length(us);
 lambda = 50;    d = lambda/2;    kx = 2*pi/lambda * us;
 %%%calculate noise variance for signal power 1
@@ -78,24 +79,28 @@ for kdx = 1:SampleSize
     r = r + tempR;
 end
 Restimate = r/SampleSize;
-%%%%%%% Spatial Smoothing Step
-%%%%Vectorize Rmatrix and remove repeated lags. We may think of z1 as data
-%%%%received by a new ULA with sensors from -U1*U2 to U1*U2.
-z1 = zeros(1,U1*N);
-for i = 1:U1*N 
-    for k = 1:U1*N 
-        for j = k:U1*N 
+%%%%%%% Spatial Smoothing Step:
+%%%%%%%Vectorize Restimate and average repeated lags. We may think of z1 as data
+%%%%%%%received by a new ULA with sensors from 0 to U1*U2.
+z1 = zeros(1,length(coarray));
+lags = zeros(1,length(coarray));
+%%%%Search for kth lag and store in z1(k). Searches through all columns in
+%%%%row 1, then searches through all columns after column 1 in row 2, then
+%%%%searches through all columns after column 2 in row 3, ...etc.
+for i = 1:length(coarray)
+    for j = i:length(coarray)
+          k = j-i+1;
             if z1(k)==0
                 if abs(Restimate(i,j)) > 0
-                    z1(k) = Restimate(i,j);
+                    z1(k) = z1(k)+Restimate(i,j); %%sum of each R(k)
+                    lags(k) = 1+lags(k); %%number of lags
                 end
             end
-        end
+       
     end
 end
-%%%%The computation above does not guarantee that the set of negative lags
-%%%%in z1 will be continuous. The positive lags are continuous so we will
-%%%%use the set of positive lags to create the negative lags.
+%%%%Dividing by lags to take the average
+z1 = z1./lags;
 z1 = z1(1:U1*U2+1);
 %%%%Create matrix from z1 to apply spatial smoothing.
 z1matrix = toeplitz(z1);
