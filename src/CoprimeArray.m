@@ -2,12 +2,9 @@ function Subarray = CoprimeArray(M,N,U1,U2)
 % Function to generate vector representation of the coprime array given Me,
 % Ne, and the undersamping factors. Also returns the subarrays and the
 % available lags and number of each lag. 
-%%
-% M = 2;
-% N = 3;
-% max_sensor = 64;
 
- max_sensor = max((M-1)*U1, (N-1)*U2)+1;
+
+max_sensor = max((M-1)*U1, (N-1)*U2)+1;
  
  
 % Generate 0 1 representation of subarray 1 and 2
