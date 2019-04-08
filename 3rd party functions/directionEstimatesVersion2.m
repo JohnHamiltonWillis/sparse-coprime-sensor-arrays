@@ -1,4 +1,4 @@
-function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesVersion2(M, N, U1, U2, SNRdB,SampleSize)
+function [pMSE,mMSE,dMSE,fMSE,flags] = directionEstimatesVersion2(M, N, U1, U2, SNRdB,SampleSize)
     %%%%Me is the number of sensors in Subarray 1, Ne is the number of
     %%%%sensors in Subarray 2, U1 is the undersampling factor of Subarray
     %%%%1, U2 is the undersampling factor of Subarray 2, SampleSize is the
@@ -8,8 +8,13 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesVersion2(M, N, U1, U2, SNRdB,
     %%%%"directionEstimates in that it doesn't have "plotfigure" argument
     %%%%For each trial, this program keeps passing through a loop until a
     %%%%satisfactory data set is obtained
+    %%
+%     M = 10; N = 10; U1 = 2; U2 = 3; SNRdB = -10; SampleSize = 1e3;
+    plot_fig = 0;
     flag = 1;
-    while flag %%%%%If the data set is not good, we need to discard the data set and come back here
+    counter = 0;
+    flags = zeros(1,4);
+    while flag && counter < 1000%%%%%If the data set is not good, we need to discard the data set and come back here
         flag = 0;
         us = cosd(randi(181,[1 2])-1);%%%Directions are uniformly distributed from 0 to 180 degrees
         numSources = length(us);
@@ -25,7 +30,7 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesVersion2(M, N, U1, U2, SNRdB,
         ApertureEnd = 63;%%%%The array starts at 0 and ends at 63
         
         %%steering vector
-        v = zeros(ApertureEnd+1,1);
+        v = zeros(ApertureEnd+1,numSources);
         %%%%%The vector will have the data for all sensors
         x = zeros(ApertureEnd+1,SampleSize);
         for idx = 1:numSources
@@ -47,10 +52,10 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesVersion2(M, N, U1, U2, SNRdB,
         xb(indexb+1,:) = x(indexb+1,:);%%%xb takes the data from x, but only where Subarray 2 has sensors
         xtotal(indexunion+1,:) = x(indexunion+1,:);%%%%this is the union of Subarray 1 and Subarray 2. This data will be
                                                    %%%%used in direct MUSIC
-                                                   
+
         %%%%%%%%%%%%%%%%%%%%ALGORITHM1: Direct MUSIC%%%%%%%%%%%%%%%%%%
         %%%%%%Algorithm1 is direct MUSIC. The covariance estimate at each
-        %%%%%%lag is obtained by taking the average of all approprirate
+        %%%%%%lag is obtained by taking the average of all approximate
         %%%%%%sensor combinations. The convolution operation  comes in very
         %%%%%%handy in evaluating covariance estimates using the right
         %%%%%%sensor pairs as shown below:
@@ -76,7 +81,7 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesVersion2(M, N, U1, U2, SNRdB,
         end
         r = zeros(length(coarray),SampleSize);%%%%covariance estimates
         for kdx = 1:SampleSize
-            dataset = xtotal(:,1);
+            dataset = xtotal(:,kdx); % kdx instead of 1 ?
             %%%%The convolution operation can actually be used to find
             %%%%autocorrelation as shown below, for each set of samples
             tempR = conv(dataset.',fliplr(conj(dataset.')));
@@ -95,13 +100,13 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesVersion2(M, N, U1, U2, SNRdB,
         noiseBasisd = eVecsortedd(:,length(us)+1:end);
         Rndirect = noiseBasisd*noiseBasisd';
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%Algorithm 2 and 3: PRODUCT/MIN MUSIC%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   
-        deltau = 0.001;
+        deltau = 0.001; %May increase as needed
         u = -1:deltau:1;
         yprod = zeros(size(u));
         ymin = zeros(size(u));
         %%%%%Apply product/min processing first
         for idx = 1:length(u)
-            totalv = (exp(1i*2*pi/lambda * u(idx) *(0:(ApertureEnd+1)).'*d));
+            totalv = (exp(1i*2*pi/lambda * u(idx) *(0:(ApertureEnd+1)).'*d)); % what is this?
             wa = zeros(max(indexa)+1,1);        
             wb = zeros(max(indexb)+1,1);        
             %%array weights
@@ -174,6 +179,7 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesVersion2(M, N, U1, U2, SNRdB,
         %%%%%%trial, but we won't see it because of "close all". But when 
         %%%%%%are debugging with breakpoints, we might want to see the
         %%%%%%figures
+        if plot_fig
             close all;
             f = figure;    
             ax = axes('Parent', f, 'FontWeight', 'Bold', 'FontSize', 16,... 
@@ -202,6 +208,7 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesVersion2(M, N, U1, U2, SNRdB,
             legend('Product','Min','Direct','Full ULA','Actual u_1','Actual u_2');
             hold on;
             set(gcf,'WindowState','maximized');    
+        end
                 
     %%%%%The rest of the program finds the peaks in our estimates and
     %%%%%computes the Mean Squared Errors
@@ -218,18 +225,21 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesVersion2(M, N, U1, U2, SNRdB,
          %%%%estimate might have only one peaks. To account for that, first
          %%%%check the length of _locs and _locs. If they are not length 2,
          %%%%make them length 2 by repeating the same peak.
-         if length(prod_locs)==1
-             prod_locs = [prod_locs prod_locs];
-         end
-         if length(min_locs)==1
-             min_locs = [min_locs min_locs];
-         end
-         if length(direct_locs)==1
-             direct_locs = [direct_locs direct_locs];
-         end
-         if length(full_locs)==1
-             full_locs = [full_locs full_locs];
-         end
+         
+         %why would we do this and check if length(*_locs == 2) if we
+         %arbitrarily make it at least two?
+%          if length(prod_locs)==1
+%              prod_locs = [prod_locs prod_locs];
+%          end
+%          if length(min_locs)==1
+%              min_locs = [min_locs min_locs];
+%          end
+%          if length(direct_locs)==1
+%              direct_locs = [direct_locs direct_locs];
+%          end
+%          if length(full_locs)==1
+%              full_locs = [full_locs full_locs];
+%          end
 
 
          if length(prod_locs)==2
@@ -238,36 +248,40 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesVersion2(M, N, U1, U2, SNRdB,
              pMSE = min(pMSE1,pMSE2);    
          else %%%%if length is not 2, the data set needs to be discarded
              %%%%The disp is just for debugging purpose
-             disp('MAJOR ERROR for product at snr and samplesize');
-             disp([SNRdB, SampleSize]);
+%              disp('MAJOR ERROR for product at snr and samplesize');
+%              disp([SNRdB, SampleSize]);
              flag = 1;
+             flags(1,1) = flags(1,1)+1;
          end
          if length(min_locs)==2
             mMSE1 = sum((us-min_locs).^2)/2;
             mMSE2 = sum((fliplr(us)-min_locs).^2)/2;
             mMSE = min(mMSE1,mMSE2);
          else
-             disp('MAJOR ERROR for min at snr and samplesize');
-             disp([SNRdB, SampleSize]);
+%              disp('MAJOR ERROR for min at snr and samplesize');
+%              disp([SNRdB, SampleSize]);
              flag = 1;
+             flags(1,2) = flags(1,2)+1;
          end
          if length(direct_locs)==2
             dMSE1 = sum((us-direct_locs).^2)/2;
             dMSE2 = sum((fliplr(us)-direct_locs).^2)/2;
             dMSE = min(dMSE1,dMSE2);
          else
-             disp('MAJOR ERROR for direct at snr and samplesize');
-             disp([SNRdB, SampleSize]);
+%              disp('MAJOR ERROR for direct at snr and samplesize');
+%              disp([SNRdB, SampleSize]);
              flag = 1;
+             flags(1,3) = flags(1,3)+1;
          end
          if length(full_locs)==2
             fMSE1 = sum((us-full_locs).^2)/2;
             fMSE2 = sum((fliplr(us)-full_locs).^2)/2;
             fMSE = min(fMSE1,fMSE2);
          else
-             disp('MAJOR ERROR for full at snr and samplesize');
-             disp([SNRdB, SampleSize]);
+%              disp('MAJOR ERROR for full at snr and samplesize');
+%              disp([SNRdB, SampleSize]);
              flag = 1;
+             flags(1,4) = flags(1,4)+1;
          end
     end
     
