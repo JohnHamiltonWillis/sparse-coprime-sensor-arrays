@@ -1,3 +1,4 @@
+clear
 SNRdB = -10; SampleSize = 1e3;
 us = cosd(randi(181,[1 2])-1);%%%Directions are uniformly distributed from 0 to 180 degrees
 numSources = length(us);
@@ -24,7 +25,14 @@ end
 x = x + sqrt(varn/2)*randn(ApertureEnd+1,SampleSize) + 1i*sqrt(varn/2)*randn(ApertureEnd+1,SampleSize);
 
 %Fourier transform trimming
-for idx = 1:SampleSize
-    x_fourier = fft(x(:,idx));
+F = zeros(ApertureEnd+1,SampleSize);
+S = zeros(ApertureEnd+1,SampleSize);
+Strim = zeros(ApertureEnd+1,SampleSize);
+xtrim = zeros(ApertureEnd+1,SampleSize);
+for idx = 1:ApertureEnd+1
+    F(idx,:) = fft(x(idx,:));
+    S(idx,:) = fftshift(F(idx,:));
+    Strim(idx,:) = [zeros(1,SampleSize/2) S(idx,SampleSize/2+1:SampleSize)];
+    xtrim(idx,:) = ifft(Strim(idx,:));
 end
 
