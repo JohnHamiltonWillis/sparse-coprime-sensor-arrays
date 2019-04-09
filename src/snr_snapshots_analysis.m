@@ -13,7 +13,7 @@ function snr_snapshots_analysis
     for i_snr = 1:length(snr)
         for j_snapshot = 1:length(snapshots)
             tic
-            disp(['i: ',num2str(snr(i_snr)), '\n j: ', num2str(snapshots(j_snapshot))]);
+            disp(['i: ',num2str(snr(i_snr)), '    j: ', num2str(snapshots(j_snapshot))]);
             for k = 1:reps
     %             [p(k),m(k),d(k),f(k),flag_cnt(k)] = ...
                 [params_mse(k,1),params_mse(k,2),params_mse(k,3), params_mse(k,4),...
