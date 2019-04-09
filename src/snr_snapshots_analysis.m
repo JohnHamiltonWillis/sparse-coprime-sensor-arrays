@@ -2,23 +2,26 @@ function snr_snapshots_analysis
 % analysis for mse's of different algorithms across snr and snapshots
     M = 10; N = 12; U1 = 2; U2 = 3;
 
-    snr = -20:0.1:20;
-    snapshots = 20:5:200;
+    snr = -20:0.5:20;
+    snapshots = 20:10:200;
     mse = zeros(length(snr),length(snapshots),4); %need 4 for p,m,d,f mse's
-    reps = 1000; % 1000 reps for each snr+snapshot var
+    reps = 100; % 1000 reps for each snr+snapshot var
     params_mse = zeros(reps,4); 
     flags_k = zeros(reps,4);
     flags = mse; % needs same preallocation
 
-    for i_snr = snr
-        for j_snapshot = snapshots
+    for i_snr = 1:length(snr)
+        for j_snapshot = 1:length(snapshots)
+            tic
+            disp(['i: ',num2str(snr(i_snr)), '\n j: ', num2str(snapshots(j_snapshot))]);
             for k = 1:reps
     %             [p(k),m(k),d(k),f(k),flag_cnt(k)] = ...
                 [params_mse(k,:),flags_k(k,:)] = ...
-                    directionEstimatesVersion2(M,N,U1,U2,i_snr,j_snapshot);           
+                    directionEstimatesVersion2(M,N,U1,U2,snr(i_snr),snapshots(j_snapshot));           
             end
-            mse(i_snr,j_snapshot,:) = average(params_mse);
-            flags(i_snr,j_snapshot,:) = average(flags_k);
+            mse(i_snr,j_snapshot,:) = mean(params_mse);
+            flags(i_snr,j_snapshot,:) = mean(flags_k);
+            toc
         end
     end
     save([pwd, '\snr_snapshot_mse.mat']);

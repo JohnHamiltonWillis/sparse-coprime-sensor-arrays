@@ -12,9 +12,10 @@ function [pMSE,mMSE,dMSE,fMSE,flags] = directionEstimatesVersion2(M, N, U1, U2, 
 %     M = 10; N = 10; U1 = 2; U2 = 3; SNRdB = -10; SampleSize = 1e3;
     plot_fig = 0;
     flag = 1;
-    counter = 0;
+    counter = -1;
     flags = zeros(1,4);
-    while flag && counter < 1000%%%%%If the data set is not good, we need to discard the data set and come back here
+    while flag && counter < 100%%%%%If the data set is not good, we need to discard the data set and come back here
+        counter = counter + flag;
         flag = 0;
         us = cosd(randi(181,[1 2])-1);%%%Directions are uniformly distributed from 0 to 180 degrees
         numSources = length(us);
