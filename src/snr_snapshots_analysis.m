@@ -1,11 +1,12 @@
 function snr_snapshots_analysis
 % analysis for mse's of different algorithms across snr and snapshots
+    time_tot = tic;
     M = 10; N = 12; U1 = 2; U2 = 3;
 
-    snr = -20:1:20;
+    snr = -20:0.5:20;
     snapshots = 20:20:200;
     mse = zeros(length(snr),length(snapshots),4); %need 4 for p,m,d,f mse's
-    reps = 10; % 1000 reps for each snr+snapshot var
+    reps = 200; % 1000 reps for each snr+snapshot var
     params_mse = zeros(reps,4); 
     flags_k = zeros(reps,4);
     flags = mse; % needs same preallocation
@@ -26,7 +27,23 @@ function snr_snapshots_analysis
             toc
         end
     end
-    save([pwd, '\snr_snapshot_mse_fixed_pregunta.mat']);
+    toc(time_tot);
+    save([pwd '\snr_snapshot_mse.mat']);
+    title_name = {'Product', 'Minimum', 'Direct', 'Full'};
+    for i = 1:4
+    f = figure;
+    sz = size(mse);
+    X = snr'.*ones(sz(1),sz(2));
+    Y = snapshots.*(ones(sz(1),sz(2)));
+    Z = mse(:,:,i);
+
+    mesh(X,Y,Z);
+    title(['MSE for ' title_name{i}]);
+    xlabel('SNR');
+    ylabel('Snapshots');
+    zlabel('MSE');
+    set(gca,'Xdir','reverse','Ydir','reverse')
+    end
 end
 
 function [pMSE,mMSE,dMSE,fMSE,flags] = directionEstimatesVersion2(M, N, U1, U2, SNRdB,SampleSize)
