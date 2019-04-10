@@ -3,10 +3,10 @@ function snr_snapshots_analysis
     time_tot = tic;
     M = 10; N = 12; U1 = 2; U2 = 3;
 
-    snr = -20:0.5:20;
-    snapshots = 20:20:200;
+    snr = -20:0.5:10;
+    snapshots = 100;
     mse = zeros(length(snr),length(snapshots),4); %need 4 for p,m,d,f mse's
-    reps = 200; % 1000 reps for each snr+snapshot var
+    reps = 1000; % 1000 reps for each snr+snapshot var
     params_mse = zeros(reps,4); 
     flags_k = zeros(reps,4);
     flags = mse; % needs same preallocation
@@ -28,22 +28,22 @@ function snr_snapshots_analysis
         end
     end
     toc(time_tot);
-    save([pwd '\snr_snapshot_mse.mat']);
-    title_name = {'Product', 'Minimum', 'Direct', 'Full'};
-    for i = 1:4
-    f = figure;
-    sz = size(mse);
-    X = snr'.*ones(sz(1),sz(2));
-    Y = snapshots.*(ones(sz(1),sz(2)));
-    Z = mse(:,:,i);
-
-    mesh(X,Y,Z);
-    title(['MSE for ' title_name{i}]);
-    xlabel('SNR');
-    ylabel('Snapshots');
-    zlabel('MSE');
-    set(gca,'Xdir','reverse','Ydir','reverse')
-    end
+    save([pwd '\snr_snapshot_mse_post_kay.mat']);
+%     title_name = {'Product', 'Minimum', 'Direct', 'Full'};
+%     for i = 1:4
+%     f = figure;
+%     sz = size(mse);
+%     X = snr'.*ones(sz(1),sz(2));
+%     Y = snapshots.*(ones(sz(1),sz(2)));
+%     Z = mse(:,:,i);
+% 
+%     mesh(X,Y,Z);
+%     title(['MSE for ' title_name{i}]);
+%     xlabel('SNR');
+%     ylabel('Snapshots');
+%     zlabel('MSE');
+%     set(gca,'Xdir','reverse','Ydir','reverse')
+%     end
 end
 
 function [pMSE,mMSE,dMSE,fMSE,flags] = directionEstimatesVersion2(M, N, U1, U2, SNRdB,SampleSize)
