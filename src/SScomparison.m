@@ -10,12 +10,12 @@
 clear all;
 close all;
 trimmeddata = trim(2,importdata("2018-10-23_183738_-61.mat"));
-realdata = 0;   %%% 1 := real data 0 := fake data
+realdata = 1;   %%% 1 := real data 0 := fake data
 N=12;
 M=12;
 U1 = 2;
 U2 = 3;
-if (realdata == 1)
+if (realdata == 0)
 num = 15; %%number of sources
 SNRdB = 20;
 SampleSize = 1000;
