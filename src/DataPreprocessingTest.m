@@ -1,4 +1,4 @@
-function DataPreprocessingTest(x)
+function xtrim = DataPreprocessingTest(x)
 SampleSize = length(x(1,:));
 ApertureEnd = 63;%%%%The array starts at 0 and ends at 63
 
@@ -23,6 +23,7 @@ ylim([-30, 0]);
 xlabel('x\pi, frequency (rad/s)')
 ylabel('S_x(exp(j\omega)) (dB)')
 grid on
+
 B = fft(xtrim(1,:));
 B = B/max(abs(B));
 subplot(2,1,2)
