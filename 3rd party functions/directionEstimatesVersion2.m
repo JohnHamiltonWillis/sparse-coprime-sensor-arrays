@@ -12,9 +12,10 @@ function [pMSE,mMSE,dMSE,fMSE,flags] = directionEstimatesVersion2(M, N, U1, U2, 
 %     M = 10; N = 10; U1 = 2; U2 = 3; SNRdB = -10; SampleSize = 1e3;
     plot_fig = 0;
     flag = 1;
-    counter = 0;
+    counter = -1;
     flags = zeros(1,4);
-    while flag && counter < 1000%%%%%If the data set is not good, we need to discard the data set and come back here
+    while flag && counter < 100%%%%%If the data set is not good, we need to discard the data set and come back here
+        counter = counter + flag;
         flag = 0;
         us = cosd(randi(181,[1 2])-1);%%%Directions are uniformly distributed from 0 to 180 degrees
         numSources = length(us);
@@ -23,7 +24,7 @@ function [pMSE,mMSE,dMSE,fMSE,flags] = directionEstimatesVersion2(M, N, U1, U2, 
         vars = ones(1,numSources);
         varn = vars(1)*10^(-SNRdB/10);
         s = zeros(numSources,SampleSize);
-        %%input signals: proper GaussianK0478768904
+        %%input signals: proper Gaussian
         for idx = 1:numSources
             s(idx,:) = (sqrt(vars(idx)/2)*randn(1,SampleSize) + 1i*sqrt(vars(idx)/2)*randn(1,SampleSize));
         end
@@ -228,18 +229,18 @@ function [pMSE,mMSE,dMSE,fMSE,flags] = directionEstimatesVersion2(M, N, U1, U2, 
          
          %why would we do this and check if length(*_locs == 2) if we
          %arbitrarily make it at least two?
-%          if length(prod_locs)==1
-%              prod_locs = [prod_locs prod_locs];
-%          end
-%          if length(min_locs)==1
-%              min_locs = [min_locs min_locs];
-%          end
-%          if length(direct_locs)==1
-%              direct_locs = [direct_locs direct_locs];
-%          end
-%          if length(full_locs)==1
-%              full_locs = [full_locs full_locs];
-%          end
+         if length(prod_locs)==1
+             prod_locs = [prod_locs prod_locs];
+         end
+         if length(min_locs)==1
+             min_locs = [min_locs min_locs];
+         end
+         if length(direct_locs)==1
+             direct_locs = [direct_locs direct_locs];
+         end
+         if length(full_locs)==1
+             full_locs = [full_locs full_locs];
+         end
 
 
          if length(prod_locs)==2

@@ -1,34 +1,46 @@
-function snr_snapshots_analysis
+function snr_snapshots_analysis_par(M,N,U1,U2,snr,snapshots,reps)
 % analysis for mse's of different algorithms across snr and snapshots
     time_tot = tic;
-    M = 10; N = 12; U1 = 2; U2 = 3;
+    
 
-    snr = -20:0.5:10;
-    snapshots = 100;
-    mse = zeros(length(snr),length(snapshots),4); %need 4 for p,m,d,f mse's
-    reps = 1000; % 1000 reps for each snr+snapshot var
-    params_mse = zeros(reps,4); 
-    flags_k = zeros(reps,4);
-    flags = mse; % needs same preallocation
 
+    mse = zeros(length(M),length(N),length(U1),length(U2),length(snr),length(snapshots),4); %need 4 for p,m,d,f mse's
+    
+%     params_mse = zeros(reps,4); 
+%     flags_k = zeros(reps,4);
+%     flags = mse; % needs same preallocation
+    p = zeros(1,reps);
+    m = p;
+    d = p;
+    f = p;
+    for M_ = 1:length(M)
+    for N_ = 1:length(N)
+    for U1_ = 1:length(U1)
+    for U2_ = 1:length(U2)
     for i_snr = 1:length(snr)
         for j_snapshot = 1:length(snapshots)
             tic
             disp(['i: ',num2str(snr(i_snr)), '    j: ', num2str(snapshots(j_snapshot))]);
-            for k = 1:reps
-    %             [p(k),m(k),d(k),f(k),flag_cnt(k)] = ...
-                [params_mse(k,1),params_mse(k,2),params_mse(k,3), params_mse(k,4),...
-                    flags_temp] = ...
-                    directionEstimatesVersion2(M,N,U1,U2,snr(i_snr),snapshots(j_snapshot));
-                flags_k(k,:) = flags_temp;
+            parfor k = 1:reps
+                [p(1,k),m(1,k),d(1,k),f(1,k)] = ...
+                    directionEstimatesVersion2(M(M_),N(N_),U1(U1_),U2(U2_),snr(i_snr),snapshots(j_snapshot));
+%                 flags_k(k,:) = flags_temp;
             end
-            mse(i_snr,j_snapshot,:) = mean(params_mse);
-            flags(i_snr,j_snapshot,:) = mean(flags_k);
+            p = mean(p);
+            m = mean(m);
+            d = mean(d);
+            f = mean(f);
+            mse(i_snr,j_snapshot,:) = [p m d f];
+%             flags(i_snr,j_snapshot,:) = mean(flags_k);
             toc
         end
     end
+    end
+    end
+    end
+    end
     toc(time_tot);
-    save([pwd '\snr_snapshot_mse_post_kay.mat']);
+    save([pwd '\snr_snapshot_mse_M_5_10_par.mat']);
 %     title_name = {'Product', 'Minimum', 'Direct', 'Full'};
 %     for i = 1:4
 %     f = figure;
