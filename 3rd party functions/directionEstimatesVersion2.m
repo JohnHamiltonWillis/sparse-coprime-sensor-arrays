@@ -24,7 +24,7 @@ function [pMSE,mMSE,dMSE,fMSE,flags] = directionEstimatesVersion2(M, N, U1, U2, 
         vars = ones(1,numSources);
         varn = vars(1)*10^(-SNRdB/10);
         s = zeros(numSources,SampleSize);
-        %%input signals: proper GaussianK0478768904
+        %%input signals: proper Gaussian
         for idx = 1:numSources
             s(idx,:) = (sqrt(vars(idx)/2)*randn(1,SampleSize) + 1i*sqrt(vars(idx)/2)*randn(1,SampleSize));
         end
@@ -229,18 +229,18 @@ function [pMSE,mMSE,dMSE,fMSE,flags] = directionEstimatesVersion2(M, N, U1, U2, 
          
          %why would we do this and check if length(*_locs == 2) if we
          %arbitrarily make it at least two?
-%          if length(prod_locs)==1
-%              prod_locs = [prod_locs prod_locs];
-%          end
-%          if length(min_locs)==1
-%              min_locs = [min_locs min_locs];
-%          end
-%          if length(direct_locs)==1
-%              direct_locs = [direct_locs direct_locs];
-%          end
-%          if length(full_locs)==1
-%              full_locs = [full_locs full_locs];
-%          end
+         if length(prod_locs)==1
+             prod_locs = [prod_locs prod_locs];
+         end
+         if length(min_locs)==1
+             min_locs = [min_locs min_locs];
+         end
+         if length(direct_locs)==1
+             direct_locs = [direct_locs direct_locs];
+         end
+         if length(full_locs)==1
+             full_locs = [full_locs full_locs];
+         end
 
 
          if length(prod_locs)==2
