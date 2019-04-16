@@ -6,7 +6,7 @@ function snr_snapshots_analysis_par
     snr = -20:0.5:-1;
     snapshots = 50;
     mse = zeros(length(snr),length(snapshots),4); %need 4 for p,m,d,f mse's
-    reps = 1000; % 1000 reps for each snr+snapshot var
+    reps = 10; % 1000 reps for each snr+snapshot var
 %     params_mse = zeros(reps,4); 
 %     flags_k = zeros(reps,4);
 %     flags = mse; % needs same preallocation
