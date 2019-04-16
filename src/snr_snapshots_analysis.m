@@ -354,4 +354,3 @@ function x = ifourierTrans(X,nlower,nhigher,varargin)
     end
 end
 
-
