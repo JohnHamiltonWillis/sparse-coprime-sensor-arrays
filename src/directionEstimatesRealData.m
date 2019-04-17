@@ -1,4 +1,4 @@
-function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleRange)
+function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleRange, deg)
     %%%%M is the number of sensors in Subarray 1, N is the number of
     %%%%sensors in Subarray 2, U1 is the undersampling factor of Subarray
     %%%%1, U2 is the undersampling factor of Subarray 2, SampleRange creates the
@@ -6,11 +6,10 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
     %%%%min range and 6 for the max range. The variable
     %%%%plotfigure determines whether the program plots the graphs or not.
     plot_fig = 1;
-    load('2019-03-22_172115_quadcopter.mat');
+    uiopen('*.mat')
     
-    us = cosd([180 0]);%Angles must be set manually according to feild measurements.
-                        %The directions are from 0 to 180 but the results
-                        %we desire are from 90.
+    us = cosd([180-deg deg]);
+    %The directions are from 0 to 180 but the results we desire are from 90
                         
     %These parameters are used in the steering vector v
     lambda = 340/3000;% meters %sound speed/frequency;    
