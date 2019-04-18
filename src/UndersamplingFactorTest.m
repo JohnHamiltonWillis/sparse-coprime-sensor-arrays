@@ -1,9 +1,10 @@
 
 min = 2;
-max = 20;
-Mmax = 50;
-Nmax = 50;
-max_spacing = 20;
+max = 60;
+Mmax = max;
+Nmax = max;
+max_spacing = 1;
+Aperture_End = 64;
 PerfectFact = zeros(3,max_spacing);
 Subarrays = zeros(2,64);
 Data = cell(2,1);
@@ -19,16 +20,18 @@ for spacing = 1:max_spacing
     Coprimes = GenerateCoprimePairs(min,max,spacing);
     
     for CoprNdx = 1:length(Coprimes)
-        U1 = Coprimes{CoprNdx}(1);
+        U1 = Coprimes{CoprNdx}(1); %The undersampling factors are set
         U2 = Coprimes{CoprNdx}(2);
-        OptimalPairs = CoarrayTest(Mmax,Nmax,U1,U2);
+        OptimalPairs = CoarrayTest(Mmax,Nmax,U1,U2,Aperture_End);
         F = find(OptimalPairs);
         if ~isempty(F)
             PerfectFact(:,spacing)= [spacing U1 U2]';
+            disp(OptimalPairs); %displays a list of M and N pairings that 
+                                %ensure a continuous coarray from the get
+                                %go
         end
     end
 end
-PerfectFactors = length(PerfectFact);
 %This script, working in concert with CoarrayTest, shows that in order to
 %ensure a continuous coarray to use with directMUSIC and no missing lags,
 %One of the undersampling factors and its associated subarray length must
