@@ -9,8 +9,8 @@
 %%%%satisfactory data set is obtained
 clear all;
 close all;
-trimmeddata = trim(2,importdata("2018-10-23_183738_-61.mat"));
-realdata = 0;   %%% 1 := real data 0 := fake data
+trimmeddata = trim(2,importdata("2019-03-22_173553_21deg,3k.mat"));
+realdata = 1;   %%% 1 := real data 0 := fake data
 N=12;
 M=12;
 U1 = 2;
@@ -19,7 +19,7 @@ if (realdata == 1)
 num = 15; %%number of sources
 SNRdB = 20;
 SampleSize = 1000;
-us = cosd(randi(181,num)-1);%%%Directions are uniformly distributed from 0 to 180 degrees
+us = cosd(69);%%%Directions are uniformly distributed from 0 to 180 degrees
 numSources = length(us);
 lambda = 50;    d = lambda/2;    kx = 2*pi/lambda * us;
 %%%calculate noise variance for signal power 1
@@ -45,7 +45,7 @@ x = x + sqrt(varn/2)*randn(ApertureEnd+1,SampleSize) + 1i*sqrt(varn/2)*randn(Ape
 end
 if (realdata == 1)
 x = trimmeddata.';  %%%real data
-us = [1 2]; %important that length(us) is defined. with real data just two signals
+us = [cosd(69)]; %important that length(us) is defined. with real data just two signals
 end
 indexa = (0:U1:(M-1)*U1).';    indexb = (0:U2:(N-1)*U2).';
 indexunion = unique([indexa' indexb']);
