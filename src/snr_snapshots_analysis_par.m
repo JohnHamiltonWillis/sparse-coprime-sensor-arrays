@@ -1,4 +1,4 @@
-function snr_snapshots_analysis_par(M,N,U1,U2,snr,snapshots,reps)
+function snr_snapshots_analysis_par(M,N,U1,U2,snr,snapshots,reps,filename)
 % analysis for mse's of different algorithms across snr and snapshots
     time_tot = tic;
     
@@ -7,8 +7,8 @@ function snr_snapshots_analysis_par(M,N,U1,U2,snr,snapshots,reps)
     mse = zeros(length(M),length(N),length(U1),length(U2),length(snr),length(snapshots),4); %need 4 for p,m,d,f mse's
     
 %     params_mse = zeros(reps,4); 
-%     flags_k = zeros(reps,4);
-%     flags = mse; % needs same preallocation
+    flags_k = zeros(reps,4);
+    flags = mse; % needs same preallocation
     p = zeros(1,reps);
     m = p;
     d = p;
@@ -22,16 +22,16 @@ function snr_snapshots_analysis_par(M,N,U1,U2,snr,snapshots,reps)
             tic
             disp(['i: ',num2str(snr(i_snr)), '    j: ', num2str(snapshots(j_snapshot))]);
             parfor k = 1:reps
-                [p(1,k),m(1,k),d(1,k),f(1,k)] = ...
+                [p(1,k),m(1,k),d(1,k),f(1,k),flags_temp] = ...
                     directionEstimatesVersion2(M(M_),N(N_),U1(U1_),U2(U2_),snr(i_snr),snapshots(j_snapshot));
-%                 flags_k(k,:) = flags_temp;
+                flags_k(k,:) = flags_temp;
             end
             p = mean(p);
             m = mean(m);
             d = mean(d);
             f = mean(f);
-            mse(i_snr,j_snapshot,:) = [p m d f];
-%             flags(i_snr,j_snapshot,:) = mean(flags_k);
+            mse(M_,N_,U1_,U2_,i_snr,j_snapshot,:) = [p m d f];
+            flags(M_,N_,U1_,U2_,i_snr,j_snapshot,:) = mean(flags_k);
             toc
         end
     end
@@ -39,8 +39,10 @@ function snr_snapshots_analysis_par(M,N,U1,U2,snr,snapshots,reps)
     end
     end
     end
-    toc(time_tot);
-    save([pwd '\snr_snapshot_mse_M_5_10_par.mat']);
+    mse = squeeze(mse);
+    flags = squeeze(flags);
+    time_tot = toc(time_tot) %#ok<NASGU>
+    save([pwd '\' filename]);
 %     title_name = {'Product', 'Minimum', 'Direct', 'Full'};
 %     for i = 1:4
 %     f = figure;
