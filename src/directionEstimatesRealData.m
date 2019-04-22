@@ -206,7 +206,7 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
 %%%%%computes the Mean Squared Errors
     MinPeakHeight = -12;
    [~,prod_locs] = findpeaks(Pprod,u,'NPeaks',2,'MinPeakHeight',MinPeakHeight);
-   [~,min_locs] = findpeaks(Pmin,u,'NPeaks',2,'MinPea kHeight',MinPeakHeight);
+   [~,min_locs] = findpeaks(Pmin,u,'NPeaks',2,'MinPeakHeight',MinPeakHeight);
    [~,direct_locs] = findpeaks(Pdirect,u,'NPeaks',2,'MinPeakHeight',MinPeakHeight);
    [~,full_locs] = findpeaks(Pf,u,'NPeaks',2,'MinPeakHeight',MinPeakHeight);
      %%%%Compute the MSE. We don't know which peak locations correspond
