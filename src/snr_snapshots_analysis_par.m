@@ -42,7 +42,6 @@ function snr_snapshots_analysis_par(M,N,U1,U2,snr,snapshots,reps,filename)
     end
     end
     end
-    end
     mse = squeeze(mse);
     flags = squeeze(flags);
     time_tot = toc(time_tot) %#ok<NASGU>
