@@ -22,7 +22,7 @@ function snr_snapshots_analysis_par(M,N,U1,U2,snr,snapshots,reps,filename)
     for i_snr = 1:length(snr)
         for j_snapshot = 1:length(snapshots)
             tic
-            disp(['M,N,U1,U2,snr,snapshots: ', num2st([M(M_N),N(M_N),U1(U1_),U2(U2_),snr(i_snr),snapshots(j_snapshot)])]);
+            disp(['M,N,U1,U2,snr,snapshots: ', num2str([M(M_N),N(M_N),U1(U1_),U2(U2_),snr(i_snr),snapshots(j_snapshot)])]);
             parfor k = 1:reps
                 [p(1,k),m(1,k),d(1,k),f(1,k),flags_temp] = ...
                     directionEstimatesVersion2(M(M_N),N(M_N),U1(U1_),U2(U2_),snr(i_snr),snapshots(j_snapshot));
