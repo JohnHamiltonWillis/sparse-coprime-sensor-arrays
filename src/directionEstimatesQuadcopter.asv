@@ -29,10 +29,7 @@ function directionEstimatesQuadcopter(M, N, U1, U2,SampleRange)
     sz = size(totalData);
     sz = sz(1);%The number of samples taken
     halfsz = sz/2; %half way mark. I hope to us this later so we don't start
-                    %at the beginning and instead start our sampling at a
-                    %range that is some distance from the center of the
-                    %data based on our choice of SampleRange and
-                    %Multiplier.
+                    %at the beginning. 
     for qdx = 1:sz/(Multiplier*SampleRange)%Only Iterates the first 15000 Samples.
         
         RealSampleSize = (qdx*SampleRange):(qdx*SampleRange+SampleRange-1);%Sets the range of samples to be used
