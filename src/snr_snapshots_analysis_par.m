@@ -4,7 +4,7 @@ function snr_snapshots_analysis_par(M,N,U1,U2,snr,snapshots,reps,filename)
     
 
 
-    mse = zeros(length(M),length(U1),length(U2),length(snr),length(snapshots),4); %need 4 for p,m,d,f mse's
+    mse = zeros(length(M),length(U1),length(snr),length(snapshots),4); %need 4 for p,m,d,f mse's
     
 %     params_mse = zeros(reps,4); 
     flags_k = zeros(reps,4);
@@ -16,24 +16,27 @@ function snr_snapshots_analysis_par(M,N,U1,U2,snr,snapshots,reps,filename)
     if length(M) ~= length(N)
         error('Length of M not equal to length of N');
     end
+    if length(U1) ~= length(U2)
+        error('Length of U1 not equal to length of U2');
+    end
+    
     for M_N = 1:length(M)
-    for U1_ = 1:length(U1)
-    for U2_ = 1:length(U2)
+    for U1_U2 = 1:length(U1)
     for i_snr = 1:length(snr)
         for j_snapshot = 1:length(snapshots)
             tic
-            disp(['M,N,U1,U2,snr,snapshots: ', num2str([M(M_N),N(M_N),U1(U1_),U2(U2_),snr(i_snr),snapshots(j_snapshot)])]);
+            disp(['M,N,U1,U2,snr,snapshots: ', num2str([M(M_N),N(M_N),U1(U1_U2),U2(U1_U2),snr(i_snr),snapshots(j_snapshot)])]);
             parfor k = 1:reps
                 [p(1,k),m(1,k),d(1,k),f(1,k),flags_temp] = ...
-                    directionEstimatesVersion2(M(M_N),N(M_N),U1(U1_),U2(U2_),snr(i_snr),snapshots(j_snapshot));
+                    directionEstimatesVersion2(M(M_N),N(M_N),U1(U1_U2),U2(U1_U2),snr(i_snr),snapshots(j_snapshot));
                 flags_k(k,:) = flags_temp;
             end
             p = mean(p);
             m = mean(m);
             d = mean(d);
             f = mean(f);
-            mse(M_N,U1_,U2_,i_snr,j_snapshot,:) = [p m d f];
-            flags(M_N,U1_,U2_,i_snr,j_snapshot,:) = mean(flags_k);
+            mse(M_N,U1_U2,i_snr,j_snapshot,:) = [p m d f];
+            flags(M_N,U1_U2,i_snr,j_snapshot,:) = mean(flags_k);
             toc
         end
     end
