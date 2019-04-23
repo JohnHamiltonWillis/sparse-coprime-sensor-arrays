@@ -4,7 +4,7 @@ function snr_snapshots_analysis_par(M,N,U1,U2,snr,snapshots,reps,filename)
     
 
 
-    mse = zeros(length(M),length(N),length(U1),length(U2),length(snr),length(snapshots),4); %need 4 for p,m,d,f mse's
+    mse = zeros(length(M),length(snr),length(snapshots),4); %need 4 for p,m,d,f mse's
     
 %     params_mse = zeros(reps,4); 
     flags_k = zeros(reps,4);
@@ -13,30 +13,28 @@ function snr_snapshots_analysis_par(M,N,U1,U2,snr,snapshots,reps,filename)
     m = p;
     d = p;
     f = p;
-    for M_ = 1:length(M)
-    for N_ = 1:length(N)
-    for U1_ = 1:length(U1)
-    for U2_ = 1:length(U2)
+    if (length(M) ~= length(N)) && (length(U1) ~= length(U2))
+        error('Lengths of M,N,U1,U2, do not match');
+    end
+    
+    for cnt = 1:length(M)
     for i_snr = 1:length(snr)
         for j_snapshot = 1:length(snapshots)
             tic
-            disp(['i: ',num2str(snr(i_snr)), '    j: ', num2str(snapshots(j_snapshot))]);
+            disp(['M,N,U1,U2,snr,snapshots: ', num2str([M(cnt),N(cnt),U1(cnt),U2(cnt),snr(i_snr),snapshots(j_snapshot)])]);
             parfor k = 1:reps
                 [p(1,k),m(1,k),d(1,k),f(1,k),flags_temp] = ...
-                    directionEstimatesVersion2(M(M_),N(N_),U1(U1_),U2(U2_),snr(i_snr),snapshots(j_snapshot));
+                    directionEstimatesVersion2(M(cnt),N(cnt),U1(cnt),U2(cnt),snr(i_snr),snapshots(j_snapshot));
                 flags_k(k,:) = flags_temp;
             end
             p = mean(p);
             m = mean(m);
             d = mean(d);
             f = mean(f);
-            mse(M_,N_,U1_,U2_,i_snr,j_snapshot,:) = [p m d f];
-            flags(M_,N_,U1_,U2_,i_snr,j_snapshot,:) = mean(flags_k);
+            mse(cnt,i_snr,j_snapshot,:) = [p m d f];
+            flags(cnt,i_snr,j_snapshot,:) = mean(flags_k);
             toc
         end
-    end
-    end
-    end
     end
     end
     mse = squeeze(mse);
