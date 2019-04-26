@@ -17,10 +17,12 @@ Subarray2((0:U2:(N-1)*U2)+1) = 1;
 
 Sensor_placement = max(vertcat(Subarray1, Subarray2)); % Combine two subarrays
 
+
 % Save the generated data to the Subarray struct
 Subarray.array = Sensor_placement;
 Subarray.sub1 = Subarray1;
 Subarray.sub2 = Subarray2;
+Subarray.num_sensors = sum(Sensor_placement);
 
 % Find the available lags given our coprime array
 coarray = conv(Sensor_placement,fliplr(Sensor_placement));
