@@ -1,3 +1,7 @@
+function SensorArrayProject(measurement_angle,nBlocksToGrab,filepath,sensor_layout)
+
+end
+
 function SENIOR_DESIGN_SCRIPT(measurement_angle, nBlocksToGrab,filepath)
 
 block_size = 8192; %this will define the number of samples returned per channel
