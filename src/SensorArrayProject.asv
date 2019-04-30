@@ -11,13 +11,11 @@ elseif flag == 1
 else
     fprintf('Acceptable flags are 0 to gather data or 1 to use available data\n')
 end
+totalData = x;
 
-cases = CSAFinder(sensor_layout);
-for i = 1:length(cases)
-    directionEstimatesRealData(cases(i,:),SampleRange,measurement_angle); %Need to specify SampleRange
-    %Need to display all figures/save all data
-end
-end
+CSAFinder(sensor_layout)
+for 
+directionEstimatesRealData(,SampleRange, deg)
 
 
 function gatherVDAM(measurement_angle,nBlocksToGrab,filepath)
