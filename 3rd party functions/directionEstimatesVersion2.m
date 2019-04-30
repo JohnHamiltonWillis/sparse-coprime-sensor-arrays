@@ -83,7 +83,7 @@ function [pMSE,mMSE,dMSE,fMSE,flags] = directionEstimatesVersion2(M, N, U1, U2, 
         end
         r = zeros(length(coarray),SampleSize);%%%%covariance estimates
         for kdx = 1:SampleSize
-            dataset = xtotal(:,kdx); % kdx instead of 1 ?
+            dataset = xtotal(:,kdx);
             %%%%The convolution operation can actually be used to find
             %%%%autocorrelation as shown below, for each set of samples
             tempR = conv(dataset.',fliplr(conj(dataset.')));
