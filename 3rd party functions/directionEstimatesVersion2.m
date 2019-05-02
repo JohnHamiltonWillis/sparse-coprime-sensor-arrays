@@ -297,15 +297,19 @@ function x = ifourierTrans(X,nlower,nhigher,varargin)
 %%%%lag
     deltau = 0.001;
     if nargin > 3
-        deltau = varargin{1};
+        deltau = varargin{1}; %What is varargin{1}?
     end
     u = -1:deltau:1;
-    temp1 = length(nlower:nhigher);
-    temp2 = size(X,2);
+    temp1 = length(nlower:nhigher); %from 0:max(lags) = 0:max sensor position
+    temp2 = size(X,2); %If X = Yprod.', size(X,2) = 1 since Yprod.' is a u by 1 matrix
+                       %containing weighted sensor data.
     x = zeros(temp1,temp2);
     count = 1;
-    for n = nlower:nhigher
-        basis = exp(1i*pi*u*n);
+    for n = nlower:nhigher %iterate from 0 to max sensor position
+        basis = exp(1i*pi*u*n); %each value of basis is a 1 by u matrix of exponentials
+                                %containing a range of frequencies from -1
+                                %to 1 for each lag from 0 to max sensor
+                                %position.
         x(count,:) = 0.5*deltau*basis*X;
         count = count + 1;
     end
