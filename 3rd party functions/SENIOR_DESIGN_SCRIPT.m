@@ -57,14 +57,14 @@ for i = 1:nBlocksToGrab
     totalData((i-1)*MA.block_size+1:i*MA.block_size,:) = reshape(data,[MA.block_size,MA.n_channels]);
 end
 
-% 
-% % now we can write these to n_channel individual wav files
+
+% now we can write these to n_channel individual wav files
 % plot(totalData(:,1:8))
 % for i = 1:MA.n_channels
 %     fprintf('Writing file number %d\n',i);
 %     filename = sprintf('%s_%0.2d.wav',wavPrefix,i);
 %     audiowrite(filename, totalData(:,i),MA.sample_rate);
-% %     wavwrite(totalData(:,i),MA.sample_rate,filename);
+%      wavwrite(totalData(:,i),MA.sample_rate,filename);
 % end
 
 %now we need to clean up the workspace by stopping the acquisition and then
