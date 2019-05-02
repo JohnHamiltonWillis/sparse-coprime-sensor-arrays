@@ -54,7 +54,7 @@ function [pMSE,mMSE,dMSE,fMSE,flags] = directionEstimatesVersion2(M, N, U1, U2, 
         xb(indexb+1,:) = x(indexb+1,:);%%%xb takes the data from x, but only where Subarray 2 has sensors
         xtotal(indexunion+1,:) = x(indexunion+1,:);%%%%this is the union of Subarray 1 and Subarray 2. This data will be
                                                    %%%%used in direct MUSIC
-
+        
         %%%%%%%%%%%%%%%%%%%%ALGORITHM1: Direct MUSIC%%%%%%%%%%%%%%%%%%
         %%%%%%Algorithm1 is direct MUSIC. The covariance estimate at each
         %%%%%%lag is obtained by taking the average of all approximate
@@ -119,8 +119,10 @@ function [pMSE,mMSE,dMSE,fMSE,flags] = directionEstimatesVersion2(M, N, U1, U2, 
             ymin(idx) = sum(min(abs([tempa;tempb])))/SampleSize;
             yprod(idx) = sum(tempa.*conj(tempb))/SampleSize;
         end
+    
         yprod = yprod/max(abs(yprod));
         ymin = ymin/max(abs(ymin));
+        
         %%%%%Eigen values and vectors for product first
         Restimate = ifourierTrans(yprod.', 0,max(lags));
         Rmatrix = toeplitz(Restimate.');
@@ -129,7 +131,8 @@ function [pMSE,mMSE,dMSE,fMSE,flags] = directionEstimatesVersion2(M, N, U1, U2, 
         [~,sortindexd] = sort(eVald,'descend');
         eVecsortedd = eVecd(:,sortindexd);
         noiseBasisd = eVecsortedd(:,length(us)+1:end);
-        Rnprod = noiseBasisd*noiseBasisd';
+         Rnprod = noiseBasisd*noiseBasisd';
+
         %%%%%Eigen values and vectors for min next
         Restimate = ifourierTrans((ymin.').^2,0,max(lags));%%%%Remember to square y for min
         Rmatrix = toeplitz(Restimate.');
@@ -174,6 +177,7 @@ function [pMSE,mMSE,dMSE,fMSE,flags] = directionEstimatesVersion2(M, N, U1, U2, 
         end
         %%%%%Normalize and convert to dB
         Pprod = 10*log10(abs(Pprod/max(abs(Pprod))));
+        vdirect=vdirect'*vdirect;
         Pmin = 10*log10(abs(Pmin/max(abs(Pmin))));
         Pdirect = 10*log10(abs(Pdirect/max(abs(Pdirect))));
         Pf = 10*log10(abs(Pf/max(abs(Pf))));
@@ -182,7 +186,7 @@ function [pMSE,mMSE,dMSE,fMSE,flags] = directionEstimatesVersion2(M, N, U1, U2, 
         %%%%%%are debugging with breakpoints, we might want to see the
         %%%%%%figures
         if plot_fig
-            close all;
+            %close all;
             f = figure;    
             ax = axes('Parent', f, 'FontWeight', 'Bold', 'FontSize', 16,... 
             'Position',[0.267203513909224 0.11 0.496339677891654 0.815]);
