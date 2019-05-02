@@ -1,4 +1,26 @@
-function SENIOR_DESIGN_SCRIPT(measurement_angle, nBlocksToGrab,filepath)
+function SensorArrayProject(measurement_angle,sensor_layout,varargin)
+m = length(varargin);
+OptArgs = {1 25 '../'};
+OptArgs(1:m) = varargin;
+[flag, nBlocksToGrab, filepath] = OptArgs{:};
+
+if flag == 0
+    gatherVDAM(measurement_angle,nBlocksToGrab,filepath);
+elseif flag == 1
+    uiopen('*.mat');
+else
+    fprintf('Acceptable flags are 0 to gather data or 1 to use available data\n')
+end
+
+cases = CSAFinder(sensor_layout);
+for i = 1:length(cases)
+    directionEstimatesRealData(cases(i,:),SampleRange,measurement_angle); %Need to specify SampleRange
+    %Need to display all figures/save all data
+end
+end
+
+
+function gatherVDAM(measurement_angle,nBlocksToGrab,filepath)
 
 block_size = 8192; %this will define the number of samples returned per channel
 % nBlocksToGrab = 25; %this will define how many consecutive blocks we wish to record. 
@@ -70,7 +92,7 @@ closeVDAM(measurement_angle,totalData,filepath,MA);
 
 end
 
-function closeVDAM(measurement_angle, totalData,filepath,MA)
+function closeVDAM(measurement_angle,totalData,filepath,MA)
     fprintf('saving data, closing VDAM...\n');
     filename = [filepath '\' datestr(now,'yyyy-mm-dd_HHMMSS') '_' measurement_angle, '.mat'];
     save(filename, 'totalData');

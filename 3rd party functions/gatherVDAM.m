@@ -4,7 +4,7 @@
 % create a Microphone_Array object and stream data into the matlab
 % workspace.
 
-function SENIOR_DESIGN_SCRIPT(measurement_angle, nBlocksToGrab,filepath)
+function gatherVDAM(measurement_angle, nBlocksToGrab,filepath)
 
 block_size = 8192; %this will define the number of samples returned per channel
 % nBlocksToGrab = 25; %this will define how many consecutive blocks we wish to record. 
