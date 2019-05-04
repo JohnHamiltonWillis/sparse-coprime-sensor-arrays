@@ -13,11 +13,11 @@ else
 end
 
 cases = CSAFinder(sensor_layout);
-for i = 1:length(cases)
-    directionEstimatesRealData(cases(i,:),measurement_angle);
-end
-end
 
+for i = 1:length(cases)
+    directionEstimatesRealData(totalData,cases(i,1),cases(i,2),cases(i,3),cases(i,4),measurement_angle);
+end
+end
 
 function gatherVDAM(measurement_angle,nBlocksToGrab,filepath)
 
@@ -211,7 +211,7 @@ Subarray.coarray = coarray;
 
 end
 
-function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2, deg)
+function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(totalData, M, N, U1, U2, deg)
     %%%%M is the number of sensors in Subarray 1, N is the number of
     %%%%sensors in Subarray 2, U1 is the undersampling factor of Subarray
     %%%%1, U2 is the undersampling factor of Subarray 2, SampleRange creates the
@@ -219,7 +219,6 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2, deg)
     %%%%min range and 6 for the max range. The variable
     %%%%plotfigure determines whether the program plots the graphs or not.
     plot_fig = 1;
-    uiopen('*.mat')
     
     us = cosd([180-deg deg]);
     %The directions are from 0 to 180 but the results we desire are from 90
@@ -283,7 +282,7 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2, deg)
         coarray(firstzeroindex:end) = [];
         lags(firstzeroindex:end) = [];
     end
-    r = zeros(length(coarray),SampleRange);%%%%covariance estimates
+    r = zeros(length(coarray),length(RealSampleSize));%%%%covariance estimates
     for kdx = 1:SampleRange
         dataset = xtotal(:,kdx); % kdx instead of 1 ?
         %%%%The convolution operation can actually be used to find
