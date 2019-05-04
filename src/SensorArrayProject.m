@@ -230,6 +230,7 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(totalData, M, N, U1,
     ApertureEnd = 63;%%%%The array starts at 0 and ends at 63
 
     RealSampleSize = floor(1/5*length(totalData)):length(totalData);%Sets the range of samples to be used
+    SampleRange = length(RealSampleSize);
     
     x = totalData(RealSampleSize,:); %The field data within the sample range is called to x
     
@@ -282,9 +283,9 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(totalData, M, N, U1,
         coarray(firstzeroindex:end) = [];
         lags(firstzeroindex:end) = [];
     end
-    r = zeros(length(coarray),length(RealSampleSize));%%%%covariance estimates
+    r = zeros(length(coarray),SampleRange);%%%%covariance estimates
     for kdx = 1:SampleRange
-        dataset = xtotal(:,kdx); % kdx instead of 1 ?
+        dataset = xtotal(:,kdx); 
         %%%%The convolution operation can actually be used to find
         %%%%autocorrelation as shown below, for each set of samples
         tempR = conv(dataset.',fliplr(conj(dataset.')));
