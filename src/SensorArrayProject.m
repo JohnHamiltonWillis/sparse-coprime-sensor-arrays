@@ -14,8 +14,7 @@ end
 
 cases = CSAFinder(sensor_layout);
 for i = 1:length(cases)
-    directionEstimatesRealData(cases(i,:),SampleRange,measurement_angle); %Need to specify SampleRange
-    %Need to display all figures/save all data
+    directionEstimatesRealData(cases(i,:),measurement_angle);
 end
 end
 
@@ -147,6 +146,7 @@ for spacing = 1:(array_length-1)
         end
     end
 end
+end
 
 function [coprimes] = GenerateCoprimePairs(min,max,spacing)
 % min is the lower bound in the range being searched. Max is the upper
@@ -179,6 +179,7 @@ for N = min+spacing:max % higher number n goes from min + spacing to max
     end
 end
 coprimes = coprimes(~cellfun('isempty',coprimes)); % remove empty cell space
+end
 
 function Subarray = CoprimeArray(M,N,U1,U2)
 % Function to generate vector representation of the coprime array given Me,
@@ -210,7 +211,7 @@ Subarray.coarray = coarray;
 
 end
 
-function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleRange, deg)
+function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2, deg)
     %%%%M is the number of sensors in Subarray 1, N is the number of
     %%%%sensors in Subarray 2, U1 is the undersampling factor of Subarray
     %%%%1, U2 is the undersampling factor of Subarray 2, SampleRange creates the
@@ -229,9 +230,9 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
     
     ApertureEnd = 63;%%%%The array starts at 0 and ends at 63
 
-    RealSampleSize = (SampleRange):(2*SampleRange-1);%Sets the range of samples to be used
+    RealSampleSize = floor(1/5*length(totalData)):length(totalData);%Sets the range of samples to be used
     
-    x = totalData(RealSampleSize,:); %The feild data within the sample range is called to x
+    x = totalData(RealSampleSize,:); %The field data within the sample range is called to x
     
     %Lambda must be defined when using vTotal in min and prod processing
     %aglorithm, and therefore d. These are the only algorithms within
@@ -410,8 +411,10 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
             plot([us(idx) us(idx)],[lowerlimit 0],'r:','LineWidth',2);
         end   
         legend('Product','Min','Direct','Full ULA','Actual u_1','Actual u_2');
+        title(['M = ',num2str(M),' N = ',num2str(N),' U1 = ',num2str(U1),' U2 = ',num2str(U2)])
         hold on;
-        set(gcf,'WindowState','maximized');    
+        set(gcf,'WindowState','maximized');
+        savefig(f,['DirectionEstimates','_',num2str(M),'_',num2str(N),'_',num2str(U1),'_',num2str(U2),'_',num2str(deg),'_',datestr(now,'yyyy-mm-dd-HHMMSS'),'.fig'])
     end
 
 %%%%%The rest of the program finds the peaks in our estimates and
@@ -446,9 +449,6 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
     fMSE1 = sum((us-full_locs).^2)/2;
     fMSE2 = sum((fliplr(us)-full_locs).^2)/2;
     fMSE = min(fMSE1,fMSE2);
-    
-    save('RealDataTest');
-
 end
 
 function x = ifourierTrans(X,nlower,nhigher,varargin)
