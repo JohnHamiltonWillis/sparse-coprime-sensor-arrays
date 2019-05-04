@@ -29,3 +29,4 @@ for N = min+spacing:max % higher number n goes from min + spacing to max
     end
 end
 coprimes = coprimes(~cellfun('isempty',coprimes)); % remove empty cell space
+end
