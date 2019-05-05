@@ -9,8 +9,9 @@ function directionEstimatesQuadcopter(M, N, U1, U2,SampleRange)
 
 %Number of sample sections (plots) is equal to
 %sz(totalData)/(SampleDivider*SampleRange)
-%increasing SampleRange widens the range for each plot
-%decreasing SampleDivider increases the number of plots.
+%increasing SampleRange widens the range for each plot thereby decreasing
+%the number of plots.
+%Increasing SampleDivider decreases the number of plots.
 
 
     %%%%M is the number of sensors in Subarray 1, N is the number of
