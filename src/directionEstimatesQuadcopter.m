@@ -17,10 +17,8 @@ function directionEstimatesQuadcopter(M, N, U1, U2,SampleRange)
     %%%%M is the number of sensors in Subarray 1, N is the number of
     %%%%sensors in Subarray 2, U1 is the undersampling factor of Subarray
     %%%%1, U2 is the undersampling factor of Subarray 2, SampleRange creates the
-    %%%%range of samples to be used. In this case SampleRange is multiplied by for the
-    %%%%min range and 6 for the max range. The variable
-    %%%%plotfigure determines whether the program plots the graphs or not.
-    plot_fig = 1;
+    %%%%range of samples to be used. 
+    
     uiopen('*.mat');
     
     us = cosd([180 0]);%does nothing in this code. Set to edges
@@ -193,36 +191,33 @@ function directionEstimatesQuadcopter(M, N, U1, U2,SampleRange)
         %%%%%%trial, but we won't see it because of "close all". But when 
         %%%%%%are debugging with breakpoints, we might want to see the
         %%%%%%figures
-        if plot_fig
-            f = figure;    
-            ax = axes('Parent', f, 'FontWeight', 'Bold', 'FontSize', 16,... 
-            'Position',[0.267203513909224 0.11 0.496339677891654 0.815]);
-            hold all;
-            plot(ax, u, Pprod, 'LineWidth', 3, 'Color', 'Black','LineStyle', '-');
-            hold on;
-            plot(ax, u, Pmin, 'LineWidth',3, 'Color', 'b','LineStyle', '--');
-            hold on;
-            plot(ax, u, Pdirect, 'LineWidth', 3, 'Color', [0.6 0 0.6],'LineStyle','-.');
-            hold on;
-    %         plot(ax, u, Pf, 'LineWidth', 3, 'Color', [0 0.6 0], 'LineStyle', ':');
-            grid on;
-    %         hold on;
-            xlabel('u=cos(\theta)', 'FontSize', 16, 'FontWeight', 'Bold');
-            ylabel('Output, dB', 'FontSize', 16, 'FontWeight', 'Bold');
-            xlim([-1 1]);
-            lowerlimit = -20;
-            ylim([lowerlimit 0]);
-            %%%%The following loop marks the actual source locations by creating a
-            %%%%line corresponding to each source location
-            for idx = 1:length(us)
-                hold on;
-                plot([us(idx) us(idx)],[lowerlimit 0],'r:','LineWidth',2);
-            end   
-            legend('Product','Min','Direct','Actual u_1','Actual u_2');
-            hold on;
-            set(gcf,'WindowState','maximized');
-            
-        end
+        f = figure;    
+        ax = axes('Parent', f, 'FontWeight', 'Bold', 'FontSize', 16,... 
+        'Position',[0.267203513909224 0.11 0.496339677891654 0.815]);
+        hold all;
+        plot(ax, u, Pprod, 'LineWidth', 3, 'Color', 'Black','LineStyle', '-');
+        hold on;
+        plot(ax, u, Pmin, 'LineWidth',3, 'Color', 'b','LineStyle', '--');
+        hold on;
+        plot(ax, u, Pdirect, 'LineWidth', 3, 'Color', [0.6 0 0.6],'LineStyle','-.');
+        hold on;
+%         plot(ax, u, Pf, 'LineWidth', 3, 'Color', [0 0.6 0], 'LineStyle', ':');
+%         grid on;
+%         hold on;
+        xlabel('u=cos(\theta)', 'FontSize', 16, 'FontWeight', 'Bold');
+        ylabel('Output, dB', 'FontSize', 16, 'FontWeight', 'Bold');
+        xlim([-1 1]);
+        lowerlimit = -20;
+        ylim([lowerlimit 0]);
+        %%%The following loop marks the actual source locations by creating a
+        %%%line corresponding to each source location
+%         for idx = 1:length(us)
+%             hold on;
+%             plot([us(idx) us(idx)],[lowerlimit 0],'r:','LineWidth',2);
+%         end   
+        legend('Product','Min','Direct');
+        hold on;
+        set(gcf,'WindowState','maximized');
     end
 %%%%%The rest of the program finds the peaks in our estimates and
 %%%%%computes the Mean Squared Errors
