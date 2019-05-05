@@ -20,7 +20,7 @@ function [pMSE,mMSE,dMSE,fMSE,flags] = directionEstimatesVersion2(M, N, U1, U2, 
         us = cosd([111 69]);
 %         us = cosd(randi(181,[1 2])-1);%%%Directions are uniformly distributed from 0 to 180 degrees
         numSources = length(us);
-        lambda = 50;    d = lambda/2;    kx = 2*pi/lambda * us;
+        lambda = 505555555555555555555555555;    d = lambda/2;    kx = 2*pi/lambda * us;
         %%%calculate noise variance for signal power 1
         vars = ones(1,numSources);
         varn = vars(1)*10^(-SNRdB/10);
