@@ -6,9 +6,9 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
     %%%%min range and 6 for the max range. The variable
     %%%%plotfigure determines whether the program plots the graphs or not.
     plot_fig = 1;
-    uiopen('*.mat')
+    uiopen('2019-03-22_173553_21deg,3k.mat')
     
-    us = cosd([180-deg deg]);
+    us = cosd([90+deg 90-deg]);
     %The directions are from 0 to 180 but the results we desire are from 90
                         
     %These parameters are used in the steering vector v
@@ -98,7 +98,7 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
     ymin = zeros(size(u));
     %%%%%Apply product/min processing first
     for idx = 1:length(u)
-        totalv = (exp(1i*2*pi/lambda * u(idx) *(0:(ApertureEnd+1)).'*d)); % what is this?
+        totalv = (exp(1i*2*pi/lambda * u(idx) *(0:(ApertureEnd+1)).'*d)); % steering vector
         wa = zeros(max(indexa)+1,1);        
         wb = zeros(max(indexb)+1,1);        
         %%array weights
@@ -136,7 +136,25 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
     xf = zeros(max(indexf)+1,SampleRange);   
     xf(indexf+1,:) = x(indexf+1,:);   
     Rf = xf*(xf')/SampleRange;
-    [eVec, eVal] = eig(Rf);
+    %%%%%%%%Spatial Smoothing needed for real signals.
+    L = 20; % # of subarrays
+    if L > ApertureEnd
+        L = ApertureEnd;
+    end
+    m = ApertureEnd + 2 - L; % length of each subarray
+    J = fliplr(eye(ApertureEnd+1));
+    SmoothR = zeros(ApertureEnd+1);
+    cnt = 1;
+        for idx = m:ApertureEnd+1
+            temp = Rf(:,cnt:idx);%the subarray is taken from Rf
+            tempr = temp*(temp')/m;%subarray autocorrelated
+            temprbar = J*conj(tempr)*J;
+            tempR = (tempr + temprbar)/(2*L);
+            SmoothR = SmoothR + tempR; %all subarray matrices are summed.
+            cnt = cnt + 1;
+        end
+    %Continue with MUSIC
+    [eVec, eVal] = eig(SmoothR); %Changed to SmoothR from Rf
     eVal = diag(eVal);
     [~,sortindex] = sort(eVal,'descend');
     eVecsorted = eVec(:,sortindex);
@@ -155,7 +173,7 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
         %%%%The three steering vectors above are equal right now, we
         %%%%might change their lengths later
 
-        vf = exp(1i*pi * idx*(0:ApertureEnd).');
+        vf = exp(-1i*pi * idx*(0:ApertureEnd).');
         Pprod(count) = 1/(vprod'*Rnprod*vprod);
         Pmin(count) = 1/(vmin'*Rnmin*vmin);
         Pdirect(count) = 1/(vdirect'*Rndirect*vdirect);    
