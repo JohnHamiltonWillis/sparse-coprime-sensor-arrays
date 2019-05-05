@@ -5,9 +5,12 @@ function directionEstimatesQuadcopter(M, N, U1, U2,SampleRange)
 %%%%%%%%%WARNING. THIS SCRIPT PLOTS A NEW FIGURE FOR EACH RUN. THE SAMPLE
 %%%%%%%%%SIZE OF TOTALDATA IS BEING DIVIDED BY (multiplier)*SAMPLERANGE WHICH YEILDS
 %%%%%%%%%AROUND 15 PLOTS IF SAMPLERANGE IS 1000 AND MULTIPLIER IS 15.
-    Multiplier = 15;
+    SampleDivider = 15;
 
-
+%Number of sample sections (plots) is equal to
+%sz(totalData)/(SampleDivider*SampleRange)
+%increasing SampleRange widens the range for each plot
+%decreasing SampleDivider increases the number of plots.
 
 
     %%%%M is the number of sensors in Subarray 1, N is the number of
@@ -17,7 +20,7 @@ function directionEstimatesQuadcopter(M, N, U1, U2,SampleRange)
     %%%%min range and 6 for the max range. The variable
     %%%%plotfigure determines whether the program plots the graphs or not.
     plot_fig = 1;
-    load('2019-03-22_172115_quadcopter.mat');
+    uiopen('*.mat');
     
     us = cosd([180 0]);%does nothing in this code. Set to edges
                         
@@ -33,7 +36,7 @@ function directionEstimatesQuadcopter(M, N, U1, U2,SampleRange)
                     %range that is some distance from the center of the
                     %data based on our choice of SampleRange and
                     %Multiplier.
-    for qdx = 1:sz/(Multiplier*SampleRange)%Only Iterates the first 15000 Samples.
+    for qdx = 1:sz/(SampleDivider*SampleRange)%Only Iterates the first 15000 Samples.
         
         RealSampleSize = (qdx*SampleRange):(qdx*SampleRange+SampleRange-1);%Sets the range of samples to be used
 
