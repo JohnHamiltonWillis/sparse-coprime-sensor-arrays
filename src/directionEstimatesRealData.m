@@ -19,7 +19,7 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
 
     RealSampleSize = (SampleRange):(2*SampleRange-1);%Sets the range of samples to be used
     
-    x = totalData(RealSampleSize,:); %The feild data within the sample range is called to x
+    x = totalData(RealSampleSize,:); %The field data within the sample range is called to x
     
     %Lambda must be defined when using vTotal in min and prod processing
     %aglorithm, and therefore d. These are the only algorithms within

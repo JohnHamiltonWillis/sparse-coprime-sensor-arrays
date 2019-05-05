@@ -13,12 +13,11 @@ else
 end
 
 cases = CSAFinder(sensor_layout);
-for i = 1:length(cases)
-    directionEstimatesRealData(cases(i,:),SampleRange,measurement_angle); %Need to specify SampleRange
-    %Need to display all figures/save all data
-end
-end
 
+for i = 1:length(cases)
+    directionEstimatesRealData(totalData,cases(i,1),cases(i,2),cases(i,3),cases(i,4),measurement_angle);
+end
+end
 
 function gatherVDAM(measurement_angle,nBlocksToGrab,filepath)
 
@@ -147,6 +146,7 @@ for spacing = 1:(array_length-1)
         end
     end
 end
+end
 
 function [coprimes] = GenerateCoprimePairs(min,max,spacing)
 % min is the lower bound in the range being searched. Max is the upper
@@ -179,6 +179,7 @@ for N = min+spacing:max % higher number n goes from min + spacing to max
     end
 end
 coprimes = coprimes(~cellfun('isempty',coprimes)); % remove empty cell space
+end
 
 function Subarray = CoprimeArray(M,N,U1,U2)
 % Function to generate vector representation of the coprime array given Me,
@@ -210,7 +211,7 @@ Subarray.coarray = coarray;
 
 end
 
-function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleRange, deg)
+function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(totalData, M, N, U1, U2, deg)
     %%%%M is the number of sensors in Subarray 1, N is the number of
     %%%%sensors in Subarray 2, U1 is the undersampling factor of Subarray
     %%%%1, U2 is the undersampling factor of Subarray 2, SampleRange creates the
@@ -218,7 +219,6 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
     %%%%min range and 6 for the max range. The variable
     %%%%plotfigure determines whether the program plots the graphs or not.
     plot_fig = 1;
-    uiopen('*.mat')
     
     us = cosd([180-deg deg]);
     %The directions are from 0 to 180 but the results we desire are from 90
@@ -229,9 +229,10 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
     
     ApertureEnd = 63;%%%%The array starts at 0 and ends at 63
 
-    RealSampleSize = (SampleRange):(2*SampleRange-1);%Sets the range of samples to be used
+    RealSampleSize = floor(1/5*length(totalData)):length(totalData);%Sets the range of samples to be used
+    SampleRange = length(RealSampleSize);
     
-    x = totalData(RealSampleSize,:); %The feild data within the sample range is called to x
+    x = totalData(RealSampleSize,:); %The field data within the sample range is called to x
     
     %Lambda must be defined when using vTotal in min and prod processing
     %aglorithm, and therefore d. These are the only algorithms within
@@ -284,7 +285,7 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
     end
     r = zeros(length(coarray),SampleRange);%%%%covariance estimates
     for kdx = 1:SampleRange
-        dataset = xtotal(:,kdx); % kdx instead of 1 ?
+        dataset = xtotal(:,kdx); 
         %%%%The convolution operation can actually be used to find
         %%%%autocorrelation as shown below, for each set of samples
         tempR = conv(dataset.',fliplr(conj(dataset.')));
@@ -410,45 +411,11 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
             plot([us(idx) us(idx)],[lowerlimit 0],'r:','LineWidth',2);
         end   
         legend('Product','Min','Direct','Full ULA','Actual u_1','Actual u_2');
+        title(['M = ',num2str(M),' N = ',num2str(N),' U1 = ',num2str(U1),' U2 = ',num2str(U2)])
         hold on;
-        set(gcf,'WindowState','maximized');    
+        set(gcf,'WindowState','maximized');
+        savefig(f,['DirectionEstimates','_',num2str(M),'_',num2str(N),'_',num2str(U1),'_',num2str(U2),'_',num2str(deg),'_',datestr(now,'yyyy-mm-dd-HHMMSS'),'.fig'])
     end
-
-%%%%%The rest of the program finds the peaks in our estimates and
-%%%%%computes the Mean Squared Errors
-    MinPeakHeight = -12;
-   [~,prod_locs] = findpeaks(Pprod,u,'NPeaks',2,'MinPeakHeight',MinPeakHeight);
-   [~,min_locs] = findpeaks(Pmin,u,'NPeaks',2,'MinPea kHeight',MinPeakHeight);
-   [~,direct_locs] = findpeaks(Pdirect,u,'NPeaks',2,'MinPeakHeight',MinPeakHeight);
-   [~,full_locs] = findpeaks(Pf,u,'NPeaks',2,'MinPeakHeight',MinPeakHeight);
-     %%%%Compute the MSE. We don't know which peak locations correspond
-     %%%%with which directions. So, we will associate _locs(1) with us(1)
-     %%%%and compute the total MSE and call it mse1. Then, we will
-     %%%%associate _locs(1) with us(2) and compute the total MSE and call
-     %%%%it mse2. Then, actual MSE = min(mse1,mse2). Also, the
-     %%%%estimate might have only one peaks. To account for that, first
-     %%%%check the length of _locs and _locs. If they are not length 2,
-     %%%%make them length 2 by repeating the same peak. end
-
-    %product MSE calculation
-    pMSE1 = sum((us-prod_locs).^2)/2;
-    pMSE2 = sum((fliplr(us)-prod_locs).^2)/2;
-    pMSE = min(pMSE1,pMSE2);    
-    %minimum MSE calculation
-    mMSE1 = sum((us-min_locs).^2)/2;
-    mMSE2 = sum((fliplr(us)-min_locs).^2)/2;
-    mMSE = min(mMSE1,mMSE2);
-    %direct MSE calculation
-    dMSE1 = sum((us-direct_locs).^2)/2;
-    dMSE2 = sum((fliplr(us)-direct_locs).^2)/2;
-    dMSE = min(dMSE1,dMSE2);
-    %full MSE calculation
-    fMSE1 = sum((us-full_locs).^2)/2;
-    fMSE2 = sum((fliplr(us)-full_locs).^2)/2;
-    fMSE = min(fMSE1,fMSE2);
-    
-    save('RealDataTest');
-
 end
 
 function x = ifourierTrans(X,nlower,nhigher,varargin)
