@@ -5,7 +5,7 @@ OptArgs(1:m) = varargin;
 [flag, nBlocksToGrab, filepath] = OptArgs{:};
 
 if flag == 0
-    gatherVDAM(measurement_angle,nBlocksToGrab,filepath);
+    gatherVDAM(num2str(measurement_angle),nBlocksToGrab,filepath);
 elseif flag == 1
     uiopen('*.mat');
 else
@@ -15,7 +15,7 @@ end
 cases = CSAFinder(sensor_layout);
 
 for i = 1:length(cases)
-    directionEstimatesRealData(totalData,cases(i,1),cases(i,2),cases(i,3),cases(i,4),measurement_angle);
+    directionEstimatesRealData(totalData,cases(i,1),cases(i,2),cases(i,3),cases(i,4),measurement_angle, filepath);
 end
 end
 
@@ -211,7 +211,7 @@ Subarray.coarray = coarray;
 
 end
 
-function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(totalData, M, N, U1, U2, deg)
+function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(totalData, M, N, U1, U2, deg, filepath)
     %%%%M is the number of sensors in Subarray 1, N is the number of
     %%%%sensors in Subarray 2, U1 is the undersampling factor of Subarray
     %%%%1, U2 is the undersampling factor of Subarray 2, SampleRange creates the
@@ -414,7 +414,7 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(totalData, M, N, U1,
         title(['M = ',num2str(M),' N = ',num2str(N),' U1 = ',num2str(U1),' U2 = ',num2str(U2)])
         hold on;
         set(gcf,'WindowState','maximized');
-        savefig(f,['DirectionEstimates','_',num2str(M),'_',num2str(N),'_',num2str(U1),'_',num2str(U2),'_',num2str(deg),'_',datestr(now,'yyyy-mm-dd-HHMMSS'),'.fig'])
+        savefig(f,[filepath,'DirectionEstimates','_',num2str(M),'_',num2str(N),'_',num2str(U1),'_',num2str(U2),'_',num2str(deg),'_',datestr(now,'yyyy-mm-dd-HHMMSS'),'.fig'])
     end
 end
 
