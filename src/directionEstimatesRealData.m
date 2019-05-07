@@ -1,4 +1,10 @@
-function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleRange, deg)
+function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleRange, deg)\
+
+    %Because of the quadcopters last time, we got really lucky finding a
+    %portion of the sensor data where the directions were found perfectly.
+    %Change the range even a little and the direction estimates go WILD.
+    
+
     %%%%M is the number of sensors in Subarray 1, N is the number of
     %%%%sensors in Subarray 2, U1 is the undersampling factor of Subarray
     %%%%1, U2 is the undersampling factor of Subarray 2, SampleRange creates the
@@ -8,15 +14,15 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
     plot_fig = 1;
     uiopen('*.mat')
     
-    us = cosd([180-deg deg]);
+    us = cosd([90+deg 90-deg]);
     %The directions are from 0 to 180 but the results we desire are from 90
                         
     %These parameters are used in the steering vector v
-    lambda = 340/3000;% meters %sound speed/frequency;    
-    d = lambda/2;    kx = 2*pi/lambda * us;
+    lambda = 50;% meters %sound speed/frequency;    
+    d = lambda/2;
     
     ApertureEnd = 63;%%%%The array starts at 0 and ends at 63
-
+    %RealSampleSize = 1:SampleRange;
     RealSampleSize = (SampleRange):(2*SampleRange-1);%Sets the range of samples to be used
     
     x = totalData(RealSampleSize,:); %The field data within the sample range is called to x
@@ -70,8 +76,8 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
         coarray(firstzeroindex:end) = [];
         lags(firstzeroindex:end) = [];
     end
-    r = zeros(length(coarray),SampleRange);%%%%covariance estimates
-    for kdx = 1:SampleRange
+    r = zeros(length(coarray),length(RealSampleSize));%%%%covariance estimates
+    for kdx = 1:length(RealSampleSize)
         dataset = xtotal(:,kdx); % kdx instead of 1 ?
         %%%%The convolution operation can actually be used to find
         %%%%autocorrelation as shown below, for each set of samples
@@ -98,7 +104,7 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
     ymin = zeros(size(u));
     %%%%%Apply product/min processing first
     for idx = 1:length(u)
-        totalv = (exp(1i*2*pi/lambda * u(idx) *(0:(ApertureEnd+1)).'*d)); % what is this?
+        totalv = (exp(1i*2*pi/lambda * u(idx) *(0:(ApertureEnd+1)).'*d)); % steering vector
         wa = zeros(max(indexa)+1,1);        
         wb = zeros(max(indexb)+1,1);        
         %%array weights
@@ -106,8 +112,8 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
         wb(indexb+1,:) = totalv(indexb+1,:)/N;
         tempa = wa'*xa;    
         tempb = wb'*xb;    
-        ymin(idx) = sum(min(abs([tempa;tempb])))/SampleRange;
-        yprod(idx) = sum(tempa.*conj(tempb))/SampleRange;
+        ymin(idx) = sum(min(abs([tempa;tempb])))/length(RealSampleSize);
+        yprod(idx) = sum(tempa.*conj(tempb))/length(RealSampleSize);
     end
     yprod = yprod/max(abs(yprod));
     ymin = ymin/max(abs(ymin));
@@ -133,10 +139,28 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%MUSIC with FULL ULA%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   
     indexf = 0:ApertureEnd;    
     indexf = indexf';    
-    xf = zeros(max(indexf)+1,SampleRange);   
+    xf = zeros(max(indexf)+1,length(RealSampleSize));   
     xf(indexf+1,:) = x(indexf+1,:);   
-    Rf = xf*(xf')/SampleRange;
-    [eVec, eVal] = eig(Rf);
+    Rf = xf*(xf')/length(RealSampleSize);
+    %%%%%%%%Spatial Smoothing needed for real signals.
+    L = 30; % # of subarrays
+    if L > ApertureEnd
+        L = ApertureEnd;
+    end
+    m = ApertureEnd + 2 - L; % length of each subarray
+    J = fliplr(eye(ApertureEnd+1));
+    SmoothR = zeros(ApertureEnd+1);
+    cnt = 1;
+        for idx = m:ApertureEnd+1
+            temp = Rf(:,cnt:idx);%the subarray is taken from Rf
+            tempr = temp*(temp')/m;%subarray autocorrelated
+            temprbar = J*conj(tempr)*J;
+            tempR = (tempr + temprbar)/(2*L);
+            SmoothR = SmoothR + tempR; %all subarray matrices are summed.
+            cnt = cnt + 1;
+        end
+    %Continue with MUSIC
+    [eVec, eVal] = eig(SmoothR); %Changed to SmoothR from Rf
     eVal = diag(eVal);
     [~,sortindex] = sort(eVal,'descend');
     eVecsorted = eVec(:,sortindex);
@@ -155,7 +179,7 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
         %%%%The three steering vectors above are equal right now, we
         %%%%might change their lengths later
 
-        vf = exp(1i*pi * idx*(0:ApertureEnd).');
+        vf = exp(-1i*pi * idx*(0:ApertureEnd).');
         Pprod(count) = 1/(vprod'*Rnprod*vprod);
         Pmin(count) = 1/(vmin'*Rnmin*vmin);
         Pdirect(count) = 1/(vdirect'*Rndirect*vdirect);    
