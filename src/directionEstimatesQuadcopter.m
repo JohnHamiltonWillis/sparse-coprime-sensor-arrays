@@ -1,44 +1,41 @@
 function directionEstimatesQuadcopter(M, N, U1, U2,SampleRange)
 
-
-
-%%%%%%%%%WARNING. THIS SCRIPT PLOTS A NEW FIGURE FOR EACH RUN. THE SAMPLE
-%%%%%%%%%SIZE OF TOTALDATA IS BEING DIVIDED BY (multiplier)*SAMPLERANGE WHICH YEILDS
-%%%%%%%%%AROUND 15 PLOTS IF SAMPLERANGE IS 1000 AND MULTIPLIER IS 15.
-    SampleDivider = 15;
-
-%Number of sample sections (plots) is equal to
-%sz(totalData)/(SampleDivider*SampleRange)
-%First divide the total Sample Range by the SampleDivider. This is the
-%total range we will be working with. Then split that range into plots the
-%width of the samplerange.
-
+%WARNING: This script opens all plots at once after completion. It may bog
+%down your graphics or crash MATLAB if there are more than 30-50 figures.
+    
+    StartingSample=1;%starting sample desired
+    EndingSample=10;%ending Sample desired
+    
+    if EndingSample < SampleRange
+        EndingSample = SampleRange;
+    end
+    Start = StartingSample/SampleRange;
+    End = EndingSample/SampleRange;
+    if Start < 1
+        Start = 1;
+    end
+    
     %%%%M is the number of sensors in Subarray 1, N is the number of
     %%%%sensors in Subarray 2, U1 is the undersampling factor of Subarray
     %%%%1, U2 is the undersampling factor of Subarray 2, SampleRange creates the
-    %%%%range of samples to be used. 
+    %%%%range of samples to be used per plot
     
     uiopen('*.mat');
-    
-    us = cosd([180 0]);%does nothing in this code. Set to edges
                         
     %These parameters are used in the steering vector v
-    lambda = 340/4000;% meters %sound speed/frequency;    
+    lambda = 99999999999999999999999;% meters %sound speed/frequency;    
     d = lambda/2;    kx = 2*pi/lambda * us;
     
     ApertureEnd = 63;%%%%The array starts at 0 and ends at 63
     sz = size(totalData);
     sz = sz(1);%The number of samples taken
-    halfsz = sz/2; %half way mark. I hope to us this later so we don't start
-                    %at the beginning and instead start our sampling at a
-                    %range that is some distance from the center of the
-                    %data based on our choice of SampleRange and
-                    %Multiplier.
-    for qdx = 1:sz/(SampleDivider*SampleRange)%Only Iterates the first 15000 Samples.
+    
+    totalData_r = Rearrange_Data(totalData);               
+    for qdx = Start:End
         
         RealSampleSize = (qdx*SampleRange):(qdx*SampleRange+SampleRange-1);%Sets the range of samples to be used
-
-        x = totalData(RealSampleSize,:); %The feild data within the sample range is called to x
+        
+        x = totalData_r(RealSampleSize,:); %The feild data within the sample range is called to x
 
         %Lambda must be defined when using vTotal in min and prod processing
         %aglorithm, and therefore d. These are the only algorithms within
@@ -205,7 +202,7 @@ function directionEstimatesQuadcopter(M, N, U1, U2,SampleRange)
 %         hold on;
         xlabel('u=cos(\theta)', 'FontSize', 16, 'FontWeight', 'Bold');
         ylabel('Output, dB', 'FontSize', 16, 'FontWeight', 'Bold');
-        xlim([-1 1]);
+        xlim([-0.35 0.35]);
         lowerlimit = -20;
         ylim([lowerlimit 0]);
         %%%The following loop marks the actual source locations by creating a
