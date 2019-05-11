@@ -5,7 +5,7 @@ OptArgs(1:m) = varargin;
 [flag, nBlocksToGrab, filepath] = OptArgs{:};
 
 if flag == 0
-    gatherVDAM(num2str(measurement_angle),nBlocksToGrab,filepath);
+    totalData = gatherVDAM(num2str(measurement_angle),nBlocksToGrab,filepath);
 elseif flag == 1
     uiopen('*.mat');
 else
@@ -21,7 +21,7 @@ for i = 1:length(cases)
 end
 end
 
-function gatherVDAM(measurement_angle,nBlocksToGrab,filepath)
+function [totalData] = gatherVDAM(measurement_angle,nBlocksToGrab,filepath)
 
 block_size = 8192; %this will define the number of samples returned per channel
 % nBlocksToGrab = 25; %this will define how many consecutive blocks we wish to record. 
@@ -192,7 +192,7 @@ end
 coprimes = coprimes(~cellfun('isempty',coprimes)); % remove empty cell space
 end
 
-function Subarray = CoprimeArray(M,N,U1,U2)
+function [Subarray] = CoprimeArray(M,N,U1,U2)
 % Function to generate vector representation of the coprime array given Me,
 % Ne, and the undersamping factors. Also returns the subarrays and the
 % available lags and number of each lag. 
@@ -429,7 +429,7 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(totalData, M, N, U1,
     end
 end
 
-function x = ifourierTrans(X,nlower,nhigher,varargin)
+function [x] = ifourierTrans(X,nlower,nhigher,varargin)
 %%%%X is the spectrum. nlower is the smallest lag. nhigher is the largest
 %%%%lag
     deltau = 0.001;
