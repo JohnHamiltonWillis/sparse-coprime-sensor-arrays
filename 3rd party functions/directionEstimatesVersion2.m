@@ -109,7 +109,7 @@ function [pMSE,mMSE,dMSE,fMSE,flags] = directionEstimatesVersion2(M, N, U1, U2, 
         ymin = zeros(size(u));
         %%%%%Apply product/min processing first
         for idx = 1:length(u)
-            totalv = (exp(1i*2*pi/lambda * u(idx) *(0:(ApertureEnd+1)).'*d)); % what is this?
+            totalv = (exp(1i*2*pi/lambda * u(idx) *(0:(ApertureEnd+1)).'*d));
             wa = zeros(max(indexa)+1,1);        
             wb = zeros(max(indexb)+1,1);        
             %%array weights
