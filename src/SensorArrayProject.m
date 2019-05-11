@@ -5,12 +5,14 @@ OptArgs(1:m) = varargin;
 [flag, nBlocksToGrab, filepath] = OptArgs{:};
 
 if flag == 0
-    gatherVDAM(num2str(measurement_angle),nBlocksToGrab,filepath);
+    totalData = gatherVDAM(num2str(measurement_angle),nBlocksToGrab,filepath);
 elseif flag == 1
     uiopen('*.mat');
 else
     fprintf('Acceptable flags are 0 to gather data or 1 to use available data\n')
 end
+
+[totalData,~] = Rearrange_Data(totalData);
 
 cases = CSAFinder(sensor_layout);
 
@@ -19,7 +21,7 @@ for i = 1:length(cases)
 end
 end
 
-function gatherVDAM(measurement_angle,nBlocksToGrab,filepath)
+function [totalData] = gatherVDAM(measurement_angle,nBlocksToGrab,filepath)
 
 block_size = 8192; %this will define the number of samples returned per channel
 % nBlocksToGrab = 25; %this will define how many consecutive blocks we wish to record. 
@@ -98,6 +100,15 @@ function closeVDAM(measurement_angle,totalData,filepath,MA)
     MA.stop();
     MA.close();
     delete(MA);
+end
+
+function [rearranged_data, correct_order] = Rearrange_Data(totalData)
+% Rearrange_Data Rearrange data from LaTech Senior Design array so that the
+% data is linear from left to right
+% second output argument is the correct_order vector. 
+correct_order = [16	32	15	31	14	30	13	29	12	28	11	27	10	26	9	25	8	24	7	23	6	22	5	21	4	20	3	19	2	18	1	17	33	49	34	50	35	51	36	52	37	53	38	54	39	55	40	56	41	57	42	58	43	59	44	60	45	61	46	62	47	63	48	64];
+
+rearranged_data = totalData(:,correct_order);
 end
 
 function [coprime_arrays] = CSAFinder(sensor_layout)
@@ -181,7 +192,7 @@ end
 coprimes = coprimes(~cellfun('isempty',coprimes)); % remove empty cell space
 end
 
-function Subarray = CoprimeArray(M,N,U1,U2)
+function [Subarray] = CoprimeArray(M,N,U1,U2)
 % Function to generate vector representation of the coprime array given Me,
 % Ne, and the undersamping factors. Also returns the subarrays and the
 % available lags and number of each lag. 
@@ -418,7 +429,7 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(totalData, M, N, U1,
     end
 end
 
-function x = ifourierTrans(X,nlower,nhigher,varargin)
+function [x] = ifourierTrans(X,nlower,nhigher,varargin)
 %%%%X is the spectrum. nlower is the smallest lag. nhigher is the largest
 %%%%lag
     deltau = 0.001;
