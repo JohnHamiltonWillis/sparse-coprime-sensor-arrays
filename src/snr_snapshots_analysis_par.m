@@ -40,7 +40,8 @@ function snr_snapshots_analysis_par(M,N,U1,U2,snr,snapshots,reps,filename)
     mse = squeeze(mse);
     flags = squeeze(flags);
     time_tot = toc(time_tot) %#ok<NASGU>
-    save([pwd '\' filename]);
+%     save([pwd '\' filename]);
+    save(filename);
 %     title_name = {'Product', 'Minimum', 'Direct', 'Full'};
 %     for i = 1:4
 %     f = figure;
