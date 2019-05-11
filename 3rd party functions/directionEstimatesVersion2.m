@@ -17,8 +17,7 @@ function [pMSE,mMSE,dMSE,fMSE,flags] = directionEstimatesVersion2(M, N, U1, U2, 
     while flag && counter < 100%%%%%If the data set is not good, we need to discard the data set and come back here
         counter = counter + flag;
         flag = 0;
-        us = cosd([111 69]);
-%         us = cosd(randi(181,[1 2])-1);%%%Directions are uniformly distributed from 0 to 180 degrees
+        us = cosd(randi(181,[1 2])-1);%%%Directions are uniformly distributed from 0 to 180 degrees
         numSources = length(us);
         %the value of lamba does nothing in this code at all. It could be
         %five hundred million and it wouldn't change
