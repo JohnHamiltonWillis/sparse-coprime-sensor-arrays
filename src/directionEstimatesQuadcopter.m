@@ -1,38 +1,41 @@
 function directionEstimatesQuadcopter(M, N, U1, U2,SampleRange)
 
-
-
-%%%%%%%%%WARNING. THIS SCRIPT PLOTS A NEW FIGURE FOR EACH RUN. THE SAMPLE
-%%%%%%%%%SIZE OF TOTALDATA IS BEING DIVIDED BY 15*SAMPLERANGE WHICH YEILDS
-%%%%%%%%%AROUND 15 PLOTS IF SAMPLERANGE IS 1000. 
-
-
-
-
-
+%WARNING: This script opens all plots at once after completion. It may bog
+%down your graphics or crash MATLAB if there are more than 30-50 figures.
+    
+    StartingSample=1;%starting sample desired
+    EndingSample=10;%ending Sample desired
+    
+    if EndingSample < SampleRange
+        EndingSample = SampleRange;
+    end
+    Start = StartingSample/SampleRange;
+    End = EndingSample/SampleRange;
+    if Start < 1
+        Start = 1;
+    end
+    
     %%%%M is the number of sensors in Subarray 1, N is the number of
     %%%%sensors in Subarray 2, U1 is the undersampling factor of Subarray
     %%%%1, U2 is the undersampling factor of Subarray 2, SampleRange creates the
-    %%%%range of samples to be used. In this case SampleRange is multiplied by for the
-    %%%%min range and 6 for the max range. The variable
-    %%%%plotfigure determines whether the program plots the graphs or not.
-    plot_fig = 1;
-    load('2019-03-22_172115_quadcopter.mat');
+    %%%%range of samples to be used per plot
     
-    us = cosd([180 0]);%does nothing in this code. Set to edges
+    uiopen('*.mat');
                         
     %These parameters are used in the steering vector v
-    lambda = 340/4000;% meters %sound speed/frequency;    
+    lambda = 99999999999999999999999;% meters %sound speed/frequency;    
     d = lambda/2;    kx = 2*pi/lambda * us;
     
     ApertureEnd = 63;%%%%The array starts at 0 and ends at 63
     sz = size(totalData);
-    sz = sz(1);
-    for qdx = 1:sz/(15*SampleRange)
+    sz = sz(1);%The number of samples taken
+    
+    totalData_r = Rearrange_Data(totalData);               
+    for qdx = Start:End
         
         RealSampleSize = (qdx*SampleRange):(qdx*SampleRange+SampleRange-1);%Sets the range of samples to be used
-
-        x = totalData(RealSampleSize,:); %The feild data within the sample range is called to x
+        
+        x = totalData_r(RealSampleSize,:); %The feild data within the sample range is called to x
 
         %Lambda must be defined when using vTotal in min and prod processing
         %aglorithm, and therefore d. These are the only algorithms within
@@ -184,36 +187,33 @@ function directionEstimatesQuadcopter(M, N, U1, U2,SampleRange)
         %%%%%%trial, but we won't see it because of "close all". But when 
         %%%%%%are debugging with breakpoints, we might want to see the
         %%%%%%figures
-        if plot_fig
-            f = figure;    
-            ax = axes('Parent', f, 'FontWeight', 'Bold', 'FontSize', 16,... 
-            'Position',[0.267203513909224 0.11 0.496339677891654 0.815]);
-            hold all;
-            plot(ax, u, Pprod, 'LineWidth', 3, 'Color', 'Black','LineStyle', '-');
-            hold on;
-            plot(ax, u, Pmin, 'LineWidth',3, 'Color', 'b','LineStyle', '--');
-            hold on;
-            plot(ax, u, Pdirect, 'LineWidth', 3, 'Color', [0.6 0 0.6],'LineStyle','-.');
-            hold on;
-    %         plot(ax, u, Pf, 'LineWidth', 3, 'Color', [0 0.6 0], 'LineStyle', ':');
-            grid on;
-    %         hold on;
-            xlabel('u=cos(\theta)', 'FontSize', 16, 'FontWeight', 'Bold');
-            ylabel('Output, dB', 'FontSize', 16, 'FontWeight', 'Bold');
-            xlim([-1 1]);
-            lowerlimit = -20;
-            ylim([lowerlimit 0]);
-            %%%%The following loop marks the actual source locations by creating a
-            %%%%line corresponding to each source location
-            for idx = 1:length(us)
-                hold on;
-                plot([us(idx) us(idx)],[lowerlimit 0],'r:','LineWidth',2);
-            end   
-            legend('Product','Min','Direct','Actual u_1','Actual u_2');
-            hold on;
-            set(gcf,'WindowState','maximized');
-            
-        end
+        f = figure;    
+        ax = axes('Parent', f, 'FontWeight', 'Bold', 'FontSize', 16,... 
+        'Position',[0.267203513909224 0.11 0.496339677891654 0.815]);
+        hold all;
+        plot(ax, u, Pprod, 'LineWidth', 3, 'Color', 'Black','LineStyle', '-');
+        hold on;
+        plot(ax, u, Pmin, 'LineWidth',3, 'Color', 'b','LineStyle', '--');
+        hold on;
+        plot(ax, u, Pdirect, 'LineWidth', 3, 'Color', [0.6 0 0.6],'LineStyle','-.');
+        hold on;
+%         plot(ax, u, Pf, 'LineWidth', 3, 'Color', [0 0.6 0], 'LineStyle', ':');
+%         grid on;
+%         hold on;
+        xlabel('u=cos(\theta)', 'FontSize', 16, 'FontWeight', 'Bold');
+        ylabel('Output, dB', 'FontSize', 16, 'FontWeight', 'Bold');
+        xlim([-0.35 0.35]);
+        lowerlimit = -20;
+        ylim([lowerlimit 0]);
+        %%%The following loop marks the actual source locations by creating a
+        %%%line corresponding to each source location
+%         for idx = 1:length(us)
+%             hold on;
+%             plot([us(idx) us(idx)],[lowerlimit 0],'r:','LineWidth',2);
+%         end   
+        legend('Product','Min','Direct');
+        hold on;
+        set(gcf,'WindowState','maximized');
     end
 %%%%%The rest of the program finds the peaks in our estimates and
 %%%%%computes the Mean Squared Errors

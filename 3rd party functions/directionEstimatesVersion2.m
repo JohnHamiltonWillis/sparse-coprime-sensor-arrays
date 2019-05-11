@@ -20,7 +20,9 @@ function [pMSE,mMSE,dMSE,fMSE,flags] = directionEstimatesVersion2(M, N, U1, U2, 
         us = cosd([111 69]);
 %         us = cosd(randi(181,[1 2])-1);%%%Directions are uniformly distributed from 0 to 180 degrees
         numSources = length(us);
-        lambda = 50;    d = lambda/2;    kx = 2*pi/lambda * us;
+        %the value of lamba does nothing in this code at all. It could be
+        %five hundred million and it wouldn't change
+        lambda = 50;   d = lambda/2;    kx = 2*pi/lambda * us;
         %%%calculate noise variance for signal power 1
         vars = ones(1,numSources);
         varn = vars(1)*10^(-SNRdB/10);
@@ -54,7 +56,7 @@ function [pMSE,mMSE,dMSE,fMSE,flags] = directionEstimatesVersion2(M, N, U1, U2, 
         xb(indexb+1,:) = x(indexb+1,:);%%%xb takes the data from x, but only where Subarray 2 has sensors
         xtotal(indexunion+1,:) = x(indexunion+1,:);%%%%this is the union of Subarray 1 and Subarray 2. This data will be
                                                    %%%%used in direct MUSIC
-
+        
         %%%%%%%%%%%%%%%%%%%%ALGORITHM1: Direct MUSIC%%%%%%%%%%%%%%%%%%
         %%%%%%Algorithm1 is direct MUSIC. The covariance estimate at each
         %%%%%%lag is obtained by taking the average of all approximate
@@ -83,7 +85,7 @@ function [pMSE,mMSE,dMSE,fMSE,flags] = directionEstimatesVersion2(M, N, U1, U2, 
         end
         r = zeros(length(coarray),SampleSize);%%%%covariance estimates
         for kdx = 1:SampleSize
-            dataset = xtotal(:,kdx); % kdx instead of 1 ?
+            dataset = xtotal(:,kdx);
             %%%%The convolution operation can actually be used to find
             %%%%autocorrelation as shown below, for each set of samples
             tempR = conv(dataset.',fliplr(conj(dataset.')));
@@ -119,8 +121,10 @@ function [pMSE,mMSE,dMSE,fMSE,flags] = directionEstimatesVersion2(M, N, U1, U2, 
             ymin(idx) = sum(min(abs([tempa;tempb])))/SampleSize;
             yprod(idx) = sum(tempa.*conj(tempb))/SampleSize;
         end
+    
         yprod = yprod/max(abs(yprod));
         ymin = ymin/max(abs(ymin));
+        
         %%%%%Eigen values and vectors for product first
         Restimate = ifourierTrans(yprod.', 0,max(lags));
         Rmatrix = toeplitz(Restimate.');
@@ -129,7 +133,8 @@ function [pMSE,mMSE,dMSE,fMSE,flags] = directionEstimatesVersion2(M, N, U1, U2, 
         [~,sortindexd] = sort(eVald,'descend');
         eVecsortedd = eVecd(:,sortindexd);
         noiseBasisd = eVecsortedd(:,length(us)+1:end);
-        Rnprod = noiseBasisd*noiseBasisd';
+         Rnprod = noiseBasisd*noiseBasisd';
+
         %%%%%Eigen values and vectors for min next
         Restimate = ifourierTrans((ymin.').^2,0,max(lags));%%%%Remember to square y for min
         Rmatrix = toeplitz(Restimate.');
@@ -174,6 +179,7 @@ function [pMSE,mMSE,dMSE,fMSE,flags] = directionEstimatesVersion2(M, N, U1, U2, 
         end
         %%%%%Normalize and convert to dB
         Pprod = 10*log10(abs(Pprod/max(abs(Pprod))));
+        vdirect=vdirect'*vdirect;
         Pmin = 10*log10(abs(Pmin/max(abs(Pmin))));
         Pdirect = 10*log10(abs(Pdirect/max(abs(Pdirect))));
         Pf = 10*log10(abs(Pf/max(abs(Pf))));
@@ -182,7 +188,7 @@ function [pMSE,mMSE,dMSE,fMSE,flags] = directionEstimatesVersion2(M, N, U1, U2, 
         %%%%%%are debugging with breakpoints, we might want to see the
         %%%%%%figures
         if plot_fig
-            close all;
+            %close all;
             f = figure;    
             ax = axes('Parent', f, 'FontWeight', 'Bold', 'FontSize', 16,... 
             'Position',[0.267203513909224 0.11 0.496339677891654 0.815]);
@@ -296,13 +302,28 @@ function x = ifourierTrans(X,nlower,nhigher,varargin)
         deltau = varargin{1};
     end
     u = -1:deltau:1;
-    temp1 = length(nlower:nhigher);
-    temp2 = size(X,2);
+    temp1 = length(nlower:nhigher); %from 0:max(lags) = 0:max sensor position
+    temp2 = size(X,2); %If X = Yprod.', size(X,2) = 1 since Yprod.' is a length(u) by 1 matrix
+                       %containing weighted sensor data.
     x = zeros(temp1,temp2);
     count = 1;
-    for n = nlower:nhigher
-        basis = exp(1i*pi*u*n);
-        x(count,:) = 0.5*deltau*basis*X;
-        count = count + 1;
+    for n = nlower:nhigher %iterate from 0 to max sensor position
+        basis = exp(1i*pi*u*n); %each value of basis is a 1 by u matrix of exponentials.
+                                %They contain a range of frequencies from -1
+                                %to 1 for each lag. Lags go from 0 to max sensor
+                                %position in a continuous fashion.
+        x(count,:) = 0.5*deltau*basis*X;%The row vector of exponentials containing
+                                        %the current frequency (basis) is
+                                        %multiplied by the column vector
+                                        % X=Yprod.' Doing so causes each
+                                        % term in Yprod to be
+                                        % multiplied with the range of
+                                        % exponentials (frequencies) in
+                                        % basis and then all the terms are
+                                        % summed together. This is the
+                                        % inverse fourier transform step.
+        count = count + 1; %The inverse fourier transform is taken for each 
+                           % value of the lags and each row of x represents
+                           % that value. Then x is returned.
     end
 end

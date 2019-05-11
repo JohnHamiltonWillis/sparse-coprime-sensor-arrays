@@ -1,64 +1,4 @@
-function snr_snapshots_analysis_par(M,N,U1,U2,snr,snapshots,reps,filename)
-% analysis for mse's of different algorithms across snr and snapshots
-    time_tot = tic;
-    
-
-
-    mse = zeros(length(M),length(snr),length(snapshots),4); %need 4 for p,m,d,f mse's
-    
-%     params_mse = zeros(reps,4); 
-    flags_k = zeros(reps,4);
-    flags = mse; % needs same preallocation
-    p = zeros(1,reps);
-    m = p;
-    d = p;
-    f = p;
-    if (length(M) ~= length(N)) && (length(U1) ~= length(U2))
-        error('Lengths of M,N,U1,U2, do not match');
-    end
-    
-    for cnt = 1:length(M)
-    for i_snr = 1:length(snr)
-        for j_snapshot = 1:length(snapshots)
-            tic
-            disp(['M,N,U1,U2,snr,snapshots: ', num2str([M(cnt),N(cnt),U1(cnt),U2(cnt),snr(i_snr),snapshots(j_snapshot)])]);
-            parfor k = 1:reps
-                [p(1,k),m(1,k),d(1,k),f(1,k),flags_temp] = ...
-                    directionEstimatesVersion2(M(cnt),N(cnt),U1(cnt),U2(cnt),snr(i_snr),snapshots(j_snapshot));
-                flags_k(k,:) = flags_temp;
-            end
-            p = mean(p);
-            m = mean(m);
-            d = mean(d);
-            f = mean(f);
-            mse(cnt,i_snr,j_snapshot,:) = [p m d f];
-            flags(cnt,i_snr,j_snapshot,:) = mean(flags_k);
-            toc
-        end
-    end
-    end
-    mse = squeeze(mse);
-    flags = squeeze(flags);
-    time_tot = toc(time_tot) %#ok<NASGU>
-    save([pwd '\' filename]);
-%     title_name = {'Product', 'Minimum', 'Direct', 'Full'};
-%     for i = 1:4
-%     f = figure;
-%     sz = size(mse);
-%     X = snr'.*ones(sz(1),sz(2));
-%     Y = snapshots.*(ones(sz(1),sz(2)));
-%     Z = mse(:,:,i);
-% 
-%     mesh(X,Y,Z);
-%     title(['MSE for ' title_name{i}]);
-%     xlabel('SNR');
-%     ylabel('Snapshots');
-%     zlabel('MSE');
-%     set(gca,'Xdir','reverse','Ydir','reverse')
-%     end
-end
-
-function [pMSE,mMSE,dMSE,fMSE,flags] = directionEstimatesVersion2(M, N, U1, U2, SNRdB,SampleSize)
+function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesVersion3(M, N, U1, U2, SNRdB,SampleSize)
     %%%%Me is the number of sensors in Subarray 1, Ne is the number of
     %%%%sensors in Subarray 2, U1 is the undersampling factor of Subarray
     %%%%1, U2 is the undersampling factor of Subarray 2, SampleSize is the
@@ -68,13 +8,8 @@ function [pMSE,mMSE,dMSE,fMSE,flags] = directionEstimatesVersion2(M, N, U1, U2, 
     %%%%"directionEstimates in that it doesn't have "plotfigure" argument
     %%%%For each trial, this program keeps passing through a loop until a
     %%%%satisfactory data set is obtained
-    %%
-%     M = 10; N = 10; U1 = 2; U2 = 3; SNRdB = -10; SampleSize = 1e3;
-    plot_fig = 0;
     flag = 1;
-    counter = 0;
-    flags = zeros(1,4);
-    while flag && counter < 1000%%%%%If the data set is not good, we need to discard the data set and come back here
+    while flag %%%%%If the data set is not good, we need to discard the data set and come back here
         flag = 0;
         us = cosd(randi(181,[1 2])-1);%%%Directions are uniformly distributed from 0 to 180 degrees
         numSources = length(us);
@@ -112,10 +47,10 @@ function [pMSE,mMSE,dMSE,fMSE,flags] = directionEstimatesVersion2(M, N, U1, U2, 
         xb(indexb+1,:) = x(indexb+1,:);%%%xb takes the data from x, but only where Subarray 2 has sensors
         xtotal(indexunion+1,:) = x(indexunion+1,:);%%%%this is the union of Subarray 1 and Subarray 2. This data will be
                                                    %%%%used in direct MUSIC
-
+        
         %%%%%%%%%%%%%%%%%%%%ALGORITHM1: Direct MUSIC%%%%%%%%%%%%%%%%%%
         %%%%%%Algorithm1 is direct MUSIC. The covariance estimate at each
-        %%%%%%lag is obtained by taking the average of all approximate
+        %%%%%%lag is obtained by taking the average of all approprirate
         %%%%%%sensor combinations. The convolution operation  comes in very
         %%%%%%handy in evaluating covariance estimates using the right
         %%%%%%sensor pairs as shown below:
@@ -141,7 +76,7 @@ function [pMSE,mMSE,dMSE,fMSE,flags] = directionEstimatesVersion2(M, N, U1, U2, 
         end
         r = zeros(length(coarray),SampleSize);%%%%covariance estimates
         for kdx = 1:SampleSize
-            dataset = xtotal(:,kdx); % kdx instead of 1 ?
+            dataset = xtotal(:,kdx);
             %%%%The convolution operation can actually be used to find
             %%%%autocorrelation as shown below, for each set of samples
             tempR = conv(dataset.',fliplr(conj(dataset.')));
@@ -160,25 +95,30 @@ function [pMSE,mMSE,dMSE,fMSE,flags] = directionEstimatesVersion2(M, N, U1, U2, 
         noiseBasisd = eVecsortedd(:,length(us)+1:end);
         Rndirect = noiseBasisd*noiseBasisd';
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%Algorithm 2 and 3: PRODUCT/MIN MUSIC%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   
-        deltau = 0.001; %May increase as needed
+        deltau = 0.001;
         u = -1:deltau:1;
         yprod = zeros(size(u));
         ymin = zeros(size(u));
+        ynonu = zeros(size(u));
         %%%%%Apply product/min processing first
         for idx = 1:length(u)
-            totalv = (exp(1i*2*pi/lambda * u(idx) *(0:(ApertureEnd+1)).'*d)); % what is this?
+            totalv = (exp(1i*2*pi/lambda * u(idx) *(0:(ApertureEnd+1)).'*d));
             wa = zeros(max(indexa)+1,1);        
-            wb = zeros(max(indexb)+1,1);        
+            wb = zeros(max(indexb)+1,1);  
+            wn = zeros(max(indexunion)+1,1);  
             %%array weights
             wa(indexa+1,:) = totalv(indexa+1,:)/M;
             wb(indexb+1,:) = totalv(indexb+1,:)/N;
+            wn(indexunion+1,:) = totalv(indexunion+1,:)/(length(indexunion));
             tempa = wa'*xa;    
             tempb = wb'*xb;    
             ymin(idx) = sum(min(abs([tempa;tempb])))/SampleSize;
             yprod(idx) = sum(tempa.*conj(tempb))/SampleSize;
+            ynonu(idx) = sum(wn'*xtotal)/SampleSize;
         end
         yprod = yprod/max(abs(yprod));
         ymin = ymin/max(abs(ymin));
+        ynonu = ynonu/max(abs(ynonu));
         %%%%%Eigen values and vectors for product first
         Restimate = ifourierTrans(yprod.', 0,max(lags));
         Rmatrix = toeplitz(Restimate.');
@@ -239,19 +179,22 @@ function [pMSE,mMSE,dMSE,fMSE,flags] = directionEstimatesVersion2(M, N, U1, U2, 
         %%%%%%trial, but we won't see it because of "close all". But when 
         %%%%%%are debugging with breakpoints, we might want to see the
         %%%%%%figures
-        if plot_fig
             close all;
             f = figure;    
             ax = axes('Parent', f, 'FontWeight', 'Bold', 'FontSize', 16,... 
             'Position',[0.267203513909224 0.11 0.496339677891654 0.815]);
             hold all;
-            plot(ax, u, Pprod, 'LineWidth', 3, 'Color', 'Black','LineStyle', '-');
+%             plot(ax, u, Pprod, 'LineWidth', 3, 'Color', 'Black','LineStyle', '-');
+%             hold on;
+%             plot(ax, u, Pmin, 'LineWidth',3, 'Color', 'b','LineStyle', '--');
+%             hold on;
+%             plot(ax, u, Pdirect, 'LineWidth', 3, 'Color', [0.6 0 0.6],'LineStyle','-.');
+%             hold on;
+            plot(ax, u, 20*log10(abs(ymin)), 'LineWidth', 3, 'Color', [0 0.6 0], 'LineStyle', ':');
+
+            plot(ax, u, 20*log10(abs(ynonu)), 'LineWidth', 3, 'Color', [0.6 0 0.6],'LineStyle','-.');
             hold on;
-            plot(ax, u, Pmin, 'LineWidth',3, 'Color', 'b','LineStyle', '--');
-            hold on;
-            plot(ax, u, Pdirect, 'LineWidth', 3, 'Color', [0.6 0 0.6],'LineStyle','-.');
-            hold on;
-            plot(ax, u, Pf, 'LineWidth', 3, 'Color', [0 0.6 0], 'LineStyle', ':');
+            
             grid on;
             hold on;
             xlabel('u=cos(\theta)', 'FontSize', 16, 'FontWeight', 'Bold');
@@ -265,84 +208,76 @@ function [pMSE,mMSE,dMSE,fMSE,flags] = directionEstimatesVersion2(M, N, U1, U2, 
                 hold on;
                 plot([us(idx) us(idx)],[lowerlimit 0],'r:','LineWidth',2);
             end   
-            legend('Product','Min','Direct','Full ULA','Actual u_1','Actual u_2');
-            hold on;
-            set(gcf,'WindowState','maximized');    
-        end
+%             legend('Product','Min','Direct','Full ULA','Actual u_1','Actual u_2');
+%             hold on;
+           % set(gcf,'WindowState','maximized');    
                 
     %%%%%The rest of the program finds the peaks in our estimates and
     %%%%%computes the Mean Squared Errors
-        MinPeakHeight = -12;
-       [~,prod_locs] = findpeaks(Pprod,u,'NPeaks',2,'MinPeakHeight',MinPeakHeight);
-       [~,min_locs] = findpeaks(Pmin,u,'NPeaks',2,'MinPeakHeight',MinPeakHeight);
-       [~,direct_locs] = findpeaks(Pdirect,u,'NPeaks',2,'MinPeakHeight',MinPeakHeight);
-       [~,full_locs] = findpeaks(Pf,u,'NPeaks',2,'MinPeakHeight',MinPeakHeight);
-         %%%%Compute the MSE. We don't know which peak locations correspond
-         %%%%with which directions. So, we will associate _locs(1) with us(1)
-         %%%%and compute the total MSE and call it mse1. Then, we will
-         %%%%associate _locs(1) with us(2) and compute the total MSE and call
-         %%%%it mse2. Then, actual MSE = min(mse1,mse2). Also, the
-         %%%%estimate might have only one peaks. To account for that, first
-         %%%%check the length of _locs and _locs. If they are not length 2,
-         %%%%make them length 2 by repeating the same peak.
-         
-         %why would we do this and check if length(*_locs == 2) if we
-         %arbitrarily make it at least two?
-%          if length(prod_locs)==1
-%              prod_locs = [prod_locs prod_locs];
-%          end
-%          if length(min_locs)==1
-%              min_locs = [min_locs min_locs];
-%          end
-%          if length(direct_locs)==1
-%              direct_locs = [direct_locs direct_locs];
-%          end
-%          if length(full_locs)==1
-%              full_locs = [full_locs full_locs];
-%          end
-
-
-         if length(prod_locs)==2
-             pMSE1 = sum((us-prod_locs).^2)/2;
-             pMSE2 = sum((fliplr(us)-prod_locs).^2)/2;
-             pMSE = min(pMSE1,pMSE2);    
-         else %%%%if length is not 2, the data set needs to be discarded
-             %%%%The disp is just for debugging purpose
-%              disp('MAJOR ERROR for product at snr and samplesize');
-%              disp([SNRdB, SampleSize]);
-             flag = 1;
-             flags(1,1) = flags(1,1)+1;
-         end
-         if length(min_locs)==2
-            mMSE1 = sum((us-min_locs).^2)/2;
-            mMSE2 = sum((fliplr(us)-min_locs).^2)/2;
-            mMSE = min(mMSE1,mMSE2);
-         else
-%              disp('MAJOR ERROR for min at snr and samplesize');
-%              disp([SNRdB, SampleSize]);
-             flag = 1;
-             flags(1,2) = flags(1,2)+1;
-         end
-         if length(direct_locs)==2
-            dMSE1 = sum((us-direct_locs).^2)/2;
-            dMSE2 = sum((fliplr(us)-direct_locs).^2)/2;
-            dMSE = min(dMSE1,dMSE2);
-         else
-%              disp('MAJOR ERROR for direct at snr and samplesize');
-%              disp([SNRdB, SampleSize]);
-             flag = 1;
-             flags(1,3) = flags(1,3)+1;
-         end
-         if length(full_locs)==2
-            fMSE1 = sum((us-full_locs).^2)/2;
-            fMSE2 = sum((fliplr(us)-full_locs).^2)/2;
-            fMSE = min(fMSE1,fMSE2);
-         else
-%              disp('MAJOR ERROR for full at snr and samplesize');
-%              disp([SNRdB, SampleSize]);
-             flag = 1;
-             flags(1,4) = flags(1,4)+1;
-         end
+% %         MinPeakHeight = -12;
+% %        [~,prod_locs] = findpeaks(Pprod,u,'NPeaks',2,'MinPeakHeight',MinPeakHeight);
+% %        [~,min_locs] = findpeaks(Pmin,u,'NPeaks',2,'MinPeakHeight',MinPeakHeight);
+% %        [~,direct_locs] = findpeaks(Pdirect,u,'NPeaks',2,'MinPeakHeight',MinPeakHeight);
+% %        [~,full_locs] = findpeaks(Pf,u,'NPeaks',2,'MinPeakHeight',MinPeakHeight);
+% %          %%%%Compute the MSE. We don't know which peak locations correspond
+% %          %%%%with which directions. So, we will associate _locs(1) with us(1)
+% %          %%%%and compute the total MSE and call it mse1. Then, we will
+% %          %%%%associate _locs(1) with us(2) and compute the total MSE and call
+% %          %%%%it mse2. Then, actual MSE = min(mse1,mse2). Also, the
+% %          %%%%estimate might have only one peaks. To account for that, first
+% %          %%%%check the length of _locs and _locs. If they are not length 2,
+% %          %%%%make them length 2 by repeating the same peak.
+% %          if length(prod_locs)==1
+% %              prod_locs = [prod_locs prod_locs];
+% %          end
+% %          if length(min_locs)==1
+% %              min_locs = [min_locs min_locs];
+% %          end
+% %          if length(direct_locs)==1
+% %              direct_locs = [direct_locs direct_locs];
+% %          end
+% %          if length(full_locs)==1
+% %              full_locs = [full_locs full_locs];
+% %          end
+% % 
+% % 
+% %          if length(prod_locs)==2
+% %              pMSE1 = sum((us-prod_locs).^2)/2;
+% %              pMSE2 = sum((fliplr(us)-prod_locs).^2)/2;
+% %              pMSE = min(pMSE1,pMSE2);    
+% %          else %%%%if length is not 2, the data set needs to be discarded
+% %              %%%%The disp is just for debugging purpose
+% %              disp('MAJOR ERROR for product at snr and samplesize');
+% %              disp([SNRdB, SampleSize]);
+% %              flag = 1;
+% %          end
+% %          if length(min_locs)==2
+% %             mMSE1 = sum((us-min_locs).^2)/2;
+% %             mMSE2 = sum((fliplr(us)-min_locs).^2)/2;
+% %             mMSE = min(mMSE1,mMSE2);
+% %          else
+% %              disp('MAJOR ERROR for min at snr and samplesize');
+% %              disp([SNRdB, SampleSize]);
+% %              flag = 1;
+% %          end
+% %          if length(direct_locs)==2
+% %             dMSE1 = sum((us-direct_locs).^2)/2;
+% %             dMSE2 = sum((fliplr(us)-direct_locs).^2)/2;
+% %             dMSE = min(dMSE1,dMSE2);
+% %          else
+% %              disp('MAJOR ERROR for direct at snr and samplesize');
+% %              disp([SNRdB, SampleSize]);
+% %              flag = 1;
+% %          end
+% %          if length(full_locs)==2
+% %             fMSE1 = sum((us-full_locs).^2)/2;
+% %             fMSE2 = sum((fliplr(us)-full_locs).^2)/2;
+% %             fMSE = min(fMSE1,fMSE2);
+% %          else
+% %              disp('MAJOR ERROR for full at snr and samplesize');
+% %              disp([SNRdB, SampleSize]);
+% %              flag = 1;
+% %          end
     end
     
 end
@@ -365,5 +300,3 @@ function x = ifourierTrans(X,nlower,nhigher,varargin)
         count = count + 1;
     end
 end
-
-
