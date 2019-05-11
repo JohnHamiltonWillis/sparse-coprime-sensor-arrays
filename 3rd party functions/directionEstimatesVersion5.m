@@ -75,11 +75,11 @@ function directionEstimatesVersion5
             end
             r(:,kdx) = (tempR.')./(coarray.');
         end
-        rnew = zeros(11,SampleSize);        
+        rnew = zeros(11,SampleSize);% Eleven is the length of lags for the set configuration    
         for kdx = 1:SampleSize
             dataset = xtotal(:,kdx);
-            rnew(1,kdx) = xtotal(1,kdx)*conj(xtotal(1,kdx));
-            rnew(2,kdx) = xtotal(3,kdx)*conj(xtotal(4,kdx));
+            rnew(1,kdx) = xtotal(1,kdx)*conj(xtotal(1,kdx));%a correlation is made for each sensor
+            rnew(2,kdx) = xtotal(3,kdx)*conj(xtotal(4,kdx));%pair
             rnew(3,kdx) = xtotal(3,kdx)*conj(xtotal(5,kdx));
             rnew(4,kdx) = xtotal(1,kdx)*conj(xtotal(4,kdx));
             rnew(5,kdx) = xtotal(1,kdx)*conj(xtotal(5,kdx));
@@ -119,7 +119,7 @@ function directionEstimatesVersion5
         
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%Algorithm 2 and 3: PRODUCT/MIN MUSIC%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   
         count = 1;
-        u = -1:0.001:1;
+        u = -1:0.001:1;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         Pdirect = zeros(size(u));%%%%direct MUSIC
         Pdirectnew = zeros(size(u));%%%%direct MUSIC
         for idx = u  

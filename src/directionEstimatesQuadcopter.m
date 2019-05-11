@@ -3,8 +3,8 @@ function directionEstimatesQuadcopter(M, N, U1, U2,SampleRange)
 %WARNING: This script opens all plots at once after completion. It may bog
 %down your graphics or crash MATLAB if there are more than 30-50 figures.
     
-    StartingSample=1;%starting sample desired
-    EndingSample=10;%ending Sample desired
+    StartingSample=750000;%starting sample desired
+    EndingSample=1000000;%ending Sample desired
     
     if EndingSample < SampleRange
         EndingSample = SampleRange;
@@ -21,7 +21,7 @@ function directionEstimatesQuadcopter(M, N, U1, U2,SampleRange)
     %%%%range of samples to be used per plot
     
     uiopen('*.mat');
-                        
+    us = cos([180 0]); %is set to edges                  
     %These parameters are used in the steering vector v
     lambda = 99999999999999999999999;% meters %sound speed/frequency;    
     d = lambda/2;    kx = 2*pi/lambda * us;
