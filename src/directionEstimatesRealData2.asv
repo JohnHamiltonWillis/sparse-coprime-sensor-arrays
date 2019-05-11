@@ -236,12 +236,14 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
         ylim([lowerlimit 0]);
         %%%%The following loop marks the actual source locations by creating a
         %%%%line corresponding to each source location
-        Color = ['y:','m:','c:','r:','g:','b:','w:','k:'];
         for idx = 1:size(us,1)
             hold on;
-            plot([us(idx,2)],Color(idx),'LineWidth',2);
+            plot([us(idx,1) us(idx,2)],[lowerlimit 0],'r:','LineWidth',2);
         end   
-        legend('Product','Min','Direct','Full ULA',strcat('Actual u',num2str(deg)));
+        legend('Product','Min','Direct','Full ULA');
+        for i = 1:size(us,1)
+            legend(['Actual u_' num2str(i)])
+        end
         hold on;
         set(gcf,'WindowState','maximized');    
     end
