@@ -11,8 +11,8 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
     %%%%range of samples to be used. In this case SampleRange is multiplied by for the
     %%%%min range and 6 for the max range. The variable
     %%%%plotfigure determines whether the program plots the graphs or not.
-    M = 12;
-    N = 15;
+    M = 32;
+    N = 22;
     U1 = 2;
     U2 = 3;
     plot_fig = 1;
@@ -113,7 +113,7 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
     eVald = diag(eVald);
     [~,sortindexd] = sort(eVald,'descend');
     eVecsortedd = eVecd(:,sortindexd);
-    noiseBasisd = eVecsortedd(:,length(us)+1:end);
+    noiseBasisd = eVecsortedd(:,2*length(deg)+1:end);
     Rndirect = noiseBasisd*noiseBasisd';
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%Algorithm 2 and 3: PRODUCT/MIN MUSIC%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   
@@ -143,7 +143,7 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
     eVald = diag(eVald);
     [~,sortindexd] = sort(eVald,'descend');
     eVecsortedd = eVecd(:,sortindexd);
-    noiseBasisd = eVecsortedd(:,length(us)+1:end);
+    noiseBasisd = eVecsortedd(:,2*length(deg)+1:end);
     Rnprod = noiseBasisd*noiseBasisd';
     %%%%%Eigen values and vectors for min next
     Restimate = ifourierTrans((ymin.').^2,0,max(lags));%%%%Remember to square y for min
@@ -152,7 +152,7 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
     eVald = diag(eVald);
     [~,sortindexd] = sort(eVald,'descend');
     eVecsortedd = eVecd(:,sortindexd);
-    noiseBasisd = eVecsortedd(:,length(us)+1:end);
+    noiseBasisd = eVecsortedd(:,2*length(deg)+1:end);
     Rnmin = noiseBasisd*noiseBasisd';
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%MUSIC with FULL ULA%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   
@@ -183,7 +183,7 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
     eVal = diag(eVal);
     [~,sortindex] = sort(eVal,'descend');
     eVecsorted = eVec(:,sortindex);
-    noiseBasis = eVecsorted(:,length(us)+1:end);
+    noiseBasis = eVecsorted(:,2*length(deg)+1:end);
     Rnf = noiseBasis*noiseBasis';    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     count = 1;
@@ -220,13 +220,17 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
         ax = axes('Parent', f, 'FontWeight', 'Bold', 'FontSize', 16,... 
         'Position',[0.267203513909224 0.11 0.496339677891654 0.815]);
         hold all;
-        plot(ax, u, Pprod, 'LineWidth', 3, 'Color', 'Black','LineStyle', '-');
+        plot(ax, u, Pprod, 'LineWidth', 3,'DisplayName','Product', 'Color', 'Black','LineStyle', '-');
         hold on;
-        plot(ax, u, Pmin, 'LineWidth',3, 'Color', 'b','LineStyle', '--');
+        legend('-DynamicLegend');
+        plot(ax, u, Pmin, 'LineWidth',3,'DisplayName','Min', 'Color', 'b','LineStyle', '--');
         hold on;
-        plot(ax, u, Pdirect, 'LineWidth', 3, 'Color', [0.6 0 0.6],'LineStyle','-.');
+        legend('-DynamicLegend');
+        plot(ax, u, Pdirect, 'LineWidth', 3,'DisplayName','Direct', 'Color', [0.6 0 0.6],'LineStyle','-.');
         hold on;
-        plot(ax, u, Pf, 'LineWidth', 3, 'Color', [0 0.6 0], 'LineStyle', ':');
+        legend('-DynamicLegend');
+        plot(ax, u, Pf, 'LineWidth', 3,'DisplayName','Full ULA', 'Color', [0 0.6 0], 'LineStyle', ':');
+        legend('-DynamicLegend');
         grid on;
         hold on;
         xlabel('u=cos(\theta)', 'FontSize', 16, 'FontWeight', 'Bold');
@@ -236,13 +240,16 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
         ylim([lowerlimit 0]);
         %%%%The following loop marks the actual source locations by creating a
         %%%%line corresponding to each source location
-        Color = ['y:','m:','c:','r:','g:','b:','w:','k:'];
-        for idx = 1:size(us,1)
-            hold on;
-            plot([us(idx,2)],Color(idx),'LineWidth',2);
-        end   
-        legend('Product','Min','Direct','Full ULA',strcat('Actual u',num2str(deg)));
-        hold on;
+        Color = {'m:';'c:';'r:';'g:';'b:';'w:';'k:';'y:'};
+for i = 1:size(deg)
+    hold on
+    plot([us(i,1) us(i,1)],[lowerlimit 0],cell2mat(Color(i)),'LineWidth',2,'DisplayName',strcat('Actual u_1',num2str(deg(i))));
+    legend('-DynamicLegend');
+    plot([us(i,2) us(i,2)],[lowerlimit 0],cell2mat(Color(i)),'LineWidth',2,'DisplayName',strcat('Actual u_2',num2str(deg(i))));
+    legend('-DynamicLegend');
+end
+      
+        
         set(gcf,'WindowState','maximized');    
     end
 
