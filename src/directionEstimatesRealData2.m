@@ -3,7 +3,6 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
     %Because of the quadcopters last time, we got really lucky finding a
     %portion of the sensor data where the directions were found perfectly.
     %Change the range even a little and the direction estimates go WILD.
-    %comment
 
     %%%%M is the number of sensors in Subarray 1, N is the number of
     %%%%sensors in Subarray 2, U1 is the undersampling factor of Subarray
@@ -17,14 +16,19 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
     U2 = 3;
     plot_fig = 1;
     num = 2;
-    D = [7 14 21 28 41];
+    D = [41 7 28 14];
     deg = zeros(num,1);
+    D = nchoosek(D,num)
+    size(D,1)
+    for k = 1:size(D,1)
+    Dcomb = D(k,:)
     for i = 1:num   
-        deg(i) = D(i);
+        deg(i) = Dcomb(i);
         totalData = importdata(['2019-03-22_' num2str(deg(i)) 'deg,3k.mat']);
         if i == 1
-        SampleRange = floor(size(totalData,1)/3);  % supposing samples = #rows
-        RealSampleSize = (SampleRange):(2*SampleRange-1);
+        RealSampleSize = length(totalData)-80000:length(totalData);
+%         SampleRange = floor(size(totalData,1)/2);  % supposing samples = #rows
+%         RealSampleSize = (SampleRange):(2*SampleRange-1);
         x = zeros((length(RealSampleSize)),64);
         size(x)
         end
@@ -108,8 +112,25 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
         r(:,kdx) = (tempR.')./(coarray.');
     end
     Restimate = mean(r,2);
-    Rmatrix = toeplitz(Restimate.');    
-    [eVecd, eVald] = eig(Rmatrix);
+    Rmatrix = toeplitz(Restimate.');
+        %%%%%%%%Spatial Smoothing needed for real signals.
+    L = length(coarray); % # of subarrays
+    if L > ApertureEnd
+        L = ApertureEnd;
+    end
+    m = ApertureEnd + 2 - L; % length of each subarray
+    J = fliplr(eye(ApertureEnd+1));
+    SmoothR = zeros(ApertureEnd+1);
+    cnt = 1;
+        for idx = m:ApertureEnd+1
+            temp = Rmatrix(:,cnt:idx);%the subarray is taken from Rmatrix
+            tempr = temp*(temp')/m;%subarray autocorrelated
+            temprbar = J*conj(tempr)*J;
+            tempR = (tempr + temprbar)/(2*L);
+            SmoothR = SmoothR + tempR; %all subarray matrices are summed.
+            cnt = cnt + 1;
+        end
+    [eVecd, eVald] = eig(SmoothR);
     eVald = diag(eVald);
     [~,sortindexd] = sort(eVald,'descend');
     eVecsortedd = eVecd(:,sortindexd);
@@ -162,7 +183,7 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
     xf(indexf+1,:) = x(indexf+1,:);   
     Rf = xf*(xf')/length(RealSampleSize);
     %%%%%%%%Spatial Smoothing needed for real signals.
-    L = 30; % # of subarrays
+    L = length(coarray); % # of subarrays
     if L > ApertureEnd
         L = ApertureEnd;
     end
@@ -215,7 +236,6 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
     %%%%%%are debugging with breakpoints, we might want to see the
     %%%%%%figures
     if plot_fig
-        close all;
         f = figure;    
         ax = axes('Parent', f, 'FontWeight', 'Bold', 'FontSize', 16,... 
         'Position',[0.267203513909224 0.11 0.496339677891654 0.815]);
@@ -249,8 +269,8 @@ for i = 1:size(deg)
     legend('-DynamicLegend');
 end
       
-        
-        set(gcf,'WindowState','maximized');    
+
+    end
     end
 
 %%%%%The rest of the program finds the peaks in our estimates and
@@ -289,7 +309,6 @@ end
     save('RealDataTest');
 
 end
-
 function x = ifourierTrans(X,nlower,nhigher,varargin)
 %%%%X is the spectrum. nlower is the smallest lag. nhigher is the largest
 %%%%lag
