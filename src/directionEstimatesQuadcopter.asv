@@ -7,7 +7,7 @@ function directionEstimatesQuadcopter(M, N, U1, U2,SampleRange)
     sz = sz(1);%The number of samples taken
     
     StartingSample=1;%starting sample desired
-    EndingSample=50000;%ending Sample desired
+    EndingSample=100000;%ending Sample desired
     
 
     if EndingSample < SampleRange
@@ -31,7 +31,7 @@ function directionEstimatesQuadcopter(M, N, U1, U2,SampleRange)
     %%%%range of samples to be used per plot
     
     
-    us = cosd([118 62]); %is set to edges                  
+    us = cos([]); %is set to edges                  
     %These parameters are used in the steering vector v
     lambda = 99999999999999999999999;% unused    
     d = lambda/2;    kx = 2*pi/lambda * us;
@@ -215,10 +215,10 @@ function directionEstimatesQuadcopter(M, N, U1, U2,SampleRange)
         ylim([lowerlimit 0]);
         %%%The following loop marks the actual source locations by creating a
         %%%line corresponding to each source location
-        for idx = 1:length(us)
-            hold on;
-            plot([us(idx) us(idx)],[lowerlimit 0],'r:','LineWidth',2);
-        end   
+%         for idx = 1:length(us)
+%             hold on;
+%             plot([us(idx) us(idx)],[lowerlimit 0],'r:','LineWidth',2);
+%         end   
         legend('Product','Min','Direct');
         hold on;
         set(gcf,'WindowState','maximized');
