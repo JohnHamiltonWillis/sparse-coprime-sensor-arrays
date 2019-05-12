@@ -1,4 +1,4 @@
-function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleRange, deg)\
+function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleRange, deg)
 
     %Because of the quadcopters last time, we got really lucky finding a
     %portion of the sensor data where the directions were found perfectly.
@@ -13,7 +13,7 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
     %%%%plotfigure determines whether the program plots the graphs or not.
     plot_fig = 1;
     uiopen('*.mat')
-    
+    totalData_r = Rearrange_Data(totalData);
     us = cosd([90+deg 90-deg]);
     %The directions are from 0 to 180 but the results we desire are from 90
                         
@@ -259,7 +259,7 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
     fMSE2 = sum((fliplr(us)-full_locs).^2)/2;
     fMSE = min(fMSE1,fMSE2);
     
-    save('RealDataTest');
+%    save('RealDataTest');
 
 end
 
