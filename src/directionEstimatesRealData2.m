@@ -15,7 +15,7 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
     U1 = 2;
     U2 = 3;
     plot_fig = 1;
-    num = 2;
+    num = 3;
     D = [41 7 28 14];
     deg = zeros(num,1);
     D = nchoosek(D,num)
@@ -26,8 +26,8 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
         deg(i) = Dcomb(i);
         totalData = importdata(['2019-03-22_' num2str(deg(i)) 'deg,3k.mat']);
         if i == 1
-        RealSampleSize = length(totalData)-80000:length(totalData);
-%         SampleRange = floor(size(totalData,1)/2);  % supposing samples = #rows
+        RealSampleSize = 10000:20000;
+%         SampleRange = floor(size(totalData,1)/2);,
 %         RealSampleSize = (SampleRange):(2*SampleRange-1);
         x = zeros((length(RealSampleSize)),64);
         size(x)
@@ -263,9 +263,9 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(M, N, U1, U2,SampleR
         Color = {'m:';'c:';'r:';'g:';'b:';'w:';'k:';'y:'};
 for i = 1:size(deg)
     hold on
-    plot([us(i,1) us(i,1)],[lowerlimit 0],cell2mat(Color(i)),'LineWidth',2,'DisplayName',strcat('Actual u_1',num2str(deg(i))));
+    plot([us(i,1) us(i,1)],[lowerlimit 0],cell2mat(Color(i)),'LineWidth',2,'DisplayName',['Actual',' ',num2str(deg(i)),' ','deg']);
     legend('-DynamicLegend');
-    plot([us(i,2) us(i,2)],[lowerlimit 0],cell2mat(Color(i)),'LineWidth',2,'DisplayName',strcat('Actual u_2',num2str(deg(i))));
+    plot([us(i,2) us(i,2)],[lowerlimit 0],cell2mat(Color(i)),'LineWidth',2,'DisplayName',['Actual',' ',num2str(deg(i)),' ','deg']);
     legend('-DynamicLegend');
 end
       
