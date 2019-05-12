@@ -39,6 +39,12 @@ function snr_snapshots_analysis_par(M,N,U1,U2,snr,snapshots,reps,filename)
     end
     mse = squeeze(mse);
     flags = squeeze(flags);
+    
+    for cnt = 1:length(U1)
+    csa = CoprimeArray(M(cnt),N(cnt),U1(cnt),U2(cnt));
+    num_sensors(cnt) = csa.num_sensors;
+    end
+    
     time_tot = toc(time_tot) %#ok<NASGU>
 %     save([pwd '\' filename]);
     save(filename);
