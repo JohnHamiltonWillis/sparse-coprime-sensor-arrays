@@ -320,6 +320,7 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(totalData, M, N, U1,
     u = -1:deltau:1;
     yprod = zeros(size(u));
     ymin = zeros(size(u));
+	ynonu = zeros(size(u));
     %%%%%Apply product/min processing first
     for idx = 1:length(u)
         totalv = (exp(1i*2*pi/lambda * u(idx) *(0:(ApertureEnd+1)).'*d)); % what is this?
@@ -332,9 +333,11 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(totalData, M, N, U1,
         tempb = wb'*xb;    
         ymin(idx) = sum(min(abs([tempa;tempb])))/SampleRange;
         yprod(idx) = sum(tempa.*conj(tempb))/SampleRange;
+		ynonu(idx) = sum(wn'*xtotal)/SampleSize;
     end
     yprod = yprod/max(abs(yprod));
     ymin = ymin/max(abs(ymin));
+	ynonu = ynonu/max(abs(ynonu));
     %%%%%Eigen values and vectors for product first
     Restimate = ifourierTrans(yprod.', 0,max(lags));
     Rmatrix = toeplitz(Restimate.');
@@ -408,6 +411,9 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(totalData, M, N, U1,
         plot(ax, u, Pdirect, 'LineWidth', 3, 'Color', [0.6 0 0.6],'LineStyle','-.');
         hold on;
         plot(ax, u, Pf, 'LineWidth', 3, 'Color', [0 0.6 0], 'LineStyle', ':');
+		plot(ax, u, 20*log10(abs(ymin)), 'LineWidth', 3, 'Color', [0 0.6 0], 'LineStyle', ':');
+		hold on
+        plot(ax, u, 20*log10(abs(ynonu)), 'LineWidth', 3, 'Color', [0.6 0 0.6],'LineStyle','-.');
         grid on;
         hold on;
         xlabel('u=cos(\theta)', 'FontSize', 16, 'FontWeight', 'Bold');
@@ -421,7 +427,7 @@ function [pMSE,mMSE,dMSE,fMSE] = directionEstimatesRealData(totalData, M, N, U1,
             hold on;
             plot([us(idx) us(idx)],[lowerlimit 0],'r:','LineWidth',2);
         end   
-        legend('Product','Min','Direct','Full ULA','Actual u_1','Actual u_2');
+        legend('Product','Min','Direct','Full ULA','Actual u_1','Actual u_2','ymin','ynonu');
         title(['M = ',num2str(M),' N = ',num2str(N),' U1 = ',num2str(U1),' U2 = ',num2str(U2)])
         hold on;
         set(gcf,'WindowState','maximized');
